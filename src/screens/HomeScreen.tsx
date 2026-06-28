@@ -1,19 +1,10 @@
 import { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  Alert,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../theme/ThemeContext';
-import { fonts } from '../theme/fonts';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -23,184 +14,144 @@ export function HomeScreen() {
   const [showJoinInput, setShowJoinInput] = useState(false);
   const [roomCode, setRoomCode] = useState('');
 
-  const handleCreateMatch = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    navigation.navigate('Match', {});
-  };
-
   const handleJoinMatch = () => {
-    if (!roomCode.trim()) {
-      Alert.alert('Erreur', 'Entre un code de room');
-      return;
-    }
+    if (!roomCode.trim()) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     navigation.navigate('Match', { roomCode: roomCode.trim().toUpperCase() });
   };
 
   return (
     <ScrollView
-      style={[styles.scroll, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.container}
+      className="flex-1 bg-background"
+      contentContainerClassName="px-5 pt-20 pb-24"
+      showsVerticalScrollIndicator={false}
     >
-      <Text style={[styles.title, { color: colors.cta, fontFamily: fonts.heading }]}>
-        ANIME DUEL
-      </Text>
+      {/* Hero */}
+      <View className="items-center mb-8 mt-5">
+        <Text className="text-cta font-heading text-4xl">ANIME DUEL</Text>
+        <Text className="text-muted font-body text-base mt-1">
+          Devine le personnage. Defie tes amis.
+        </Text>
+      </View>
 
-      <View style={styles.menu}>
+      {/* Actions */}
+      <View className="gap-3 mb-2">
         <TouchableOpacity
-          style={[styles.menuBtn, { backgroundColor: colors.cta }]}
-          onPress={handleCreateMatch}
+          className="bg-cta rounded-button min-h-[52px] px-5 py-4 justify-center"
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); navigation.navigate('Solo'); }}
           activeOpacity={0.8}
         >
-          <Text style={[styles.menuBtnText, { fontFamily: fonts.bodySemiBold }]}>Creer un match</Text>
-          <Text style={[styles.menuBtnSub, { fontFamily: fonts.body }]}>Invite un ami avec un code</Text>
+          <Text className="text-white font-body-semibold text-base">Mode Solo</Text>
+          <Text className="text-white/70 font-body text-sm mt-0.5">Joue contre l'IA</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          className="bg-primary rounded-button min-h-[52px] px-5 py-4 justify-center"
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); navigation.navigate('Match', {}); }}
+          activeOpacity={0.8}
+        >
+          <Text className="text-white font-body-semibold text-base">Creer un match</Text>
+          <Text className="text-white/70 font-body text-sm mt-0.5">Invite un ami avec un code</Text>
         </TouchableOpacity>
 
         {!showJoinInput ? (
           <TouchableOpacity
-            style={[styles.menuBtn, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cta }]}
+            className="bg-surface border border-border rounded-button min-h-[52px] px-5 py-4 justify-center"
             onPress={() => setShowJoinInput(true)}
             activeOpacity={0.8}
           >
-            <Text style={[styles.menuBtnText, { color: colors.cta, fontFamily: fonts.bodySemiBold }]}>Rejoindre un match</Text>
-            <Text style={[styles.menuBtnSub, { color: colors.textSecondary, fontFamily: fonts.body }]}>Entre le code d'un ami</Text>
+            <Text style={{ color: colors.text }} className="font-body-semibold text-base">Rejoindre un match</Text>
+            <Text className="text-muted font-body text-sm mt-0.5">Entre le code d'un ami</Text>
           </TouchableOpacity>
         ) : (
-          <View style={styles.joinSection}>
-            <TextInput
-              style={[styles.codeInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.cta, fontFamily: fonts.bodyBold }]}
-              placeholder="CODE"
-              placeholderTextColor={colors.textMuted}
-              value={roomCode}
-              onChangeText={setRoomCode}
-              autoCapitalize="characters"
-              maxLength={6}
-              autoFocus
-            />
-            <TouchableOpacity
-              style={[styles.joinBtn, { backgroundColor: colors.cta }]}
-              onPress={handleJoinMatch}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.joinBtnText, { fontFamily: fonts.bodySemiBold }]}>Go</Text>
-            </TouchableOpacity>
+          <View className="bg-surface rounded-card p-3 border border-border">
+            <View className="flex-row gap-3">
+              <TextInput
+                className="flex-1 bg-surface-elevated rounded-xl min-h-[48px] px-4 text-center text-lg tracking-widest border-2 border-primary font-body-bold"
+                style={{ color: colors.text }}
+                placeholder="CODE"
+                placeholderTextColor={colors.textMuted}
+                value={roomCode}
+                onChangeText={setRoomCode}
+                autoCapitalize="characters"
+                maxLength={6}
+                autoFocus
+              />
+              <TouchableOpacity
+                className="bg-primary rounded-xl min-h-[48px] px-6 justify-center"
+                onPress={handleJoinMatch}
+                activeOpacity={0.8}
+              >
+                <Text className="text-white font-body-semibold text-base">Go</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
+      </View>
 
+      {/* Explorer */}
+      <Text className="text-muted font-body-semibold text-xs uppercase tracking-wider mt-6 mb-3">
+        Explorer
+      </Text>
+      <View className="flex-row gap-3">
         <TouchableOpacity
-          style={[styles.menuBtn, { backgroundColor: colors.primary }]}
-          onPress={() => navigation.navigate('Solo')}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.menuBtnText, { fontFamily: fonts.bodySemiBold }]}>Mode Solo</Text>
-          <Text style={[styles.menuBtnSub, { fontFamily: fonts.body }]}>Joue contre l'IA</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.menuBtn, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}
+          className="flex-1 bg-surface border border-border rounded-card py-5 items-center min-h-[80px] justify-center"
           onPress={() => navigation.navigate('Catalog')}
-          activeOpacity={0.8}
+          activeOpacity={0.7}
         >
-          <Text style={[styles.menuBtnText, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>Catalogue</Text>
-          <Text style={[styles.menuBtnSub, { color: colors.textSecondary, fontFamily: fonts.body }]}>Explore les personnages</Text>
+          <Text className="text-primary text-xl font-bold mb-1">50+</Text>
+          <Text style={{ color: colors.text }} className="font-body-semibold text-sm">Catalogue</Text>
         </TouchableOpacity>
-
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={[styles.halfBtn, { backgroundColor: colors.warning }]}
-            onPress={() => navigation.navigate('Missions')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.halfBtnText, { fontFamily: fonts.bodySemiBold }]}>Missions</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.halfBtn, { backgroundColor: colors.success }]}
-            onPress={() => navigation.navigate('Shop')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.halfBtnText, { fontFamily: fonts.bodySemiBold }]}>Boutique</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={[styles.halfBtn, { backgroundColor: '#3498db' }]}
-            onPress={() => navigation.navigate('Leaderboard')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.halfBtnText, { fontFamily: fonts.bodySemiBold }]}>Classement</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.halfBtn, { backgroundColor: colors.surfaceElevated, borderWidth: 1, borderColor: colors.border }]}
-            onPress={() => navigation.navigate('History')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.halfBtnText, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>Historique</Text>
-          </TouchableOpacity>
-        </View>
-
         <TouchableOpacity
-          style={[styles.menuBtn, { backgroundColor: colors.surfaceElevated }]}
-          onPress={() => navigation.navigate('Profile')}
-          activeOpacity={0.8}
+          className="flex-1 bg-surface border border-border rounded-card py-5 items-center min-h-[80px] justify-center"
+          onPress={() => navigation.navigate('Leaderboard')}
+          activeOpacity={0.7}
         >
-          <Text style={[styles.menuBtnText, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>Mon Profil</Text>
+          <Text className="text-warning text-xl font-bold mb-1">#1</Text>
+          <Text style={{ color: colors.text }} className="font-body-semibold text-sm">Classement</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Progression */}
+      <Text className="text-muted font-body-semibold text-xs uppercase tracking-wider mt-6 mb-3">
+        Progression
+      </Text>
+      <View className="flex-row gap-3">
+        <TouchableOpacity
+          className="flex-1 bg-surface border border-border rounded-card py-5 items-center min-h-[80px] justify-center"
+          onPress={() => navigation.navigate('Missions')}
+          activeOpacity={0.7}
+        >
+          <Text className="text-cta text-xl font-bold mb-1">!</Text>
+          <Text style={{ color: colors.text }} className="font-body-semibold text-sm">Missions</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-1 bg-surface border border-border rounded-card py-5 items-center min-h-[80px] justify-center"
+          onPress={() => navigation.navigate('Shop')}
+          activeOpacity={0.7}
+        >
+          <Text className="text-success text-xl font-bold mb-1">J</Text>
+          <Text style={{ color: colors.text }} className="font-body-semibold text-sm">Boutique</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Bottom links */}
+      <View className="flex-row gap-3 mt-6">
+        <TouchableOpacity
+          className="flex-1 bg-surface-elevated border border-border rounded-xl py-3.5 items-center min-h-[48px]"
+          onPress={() => navigation.navigate('History')}
+          activeOpacity={0.7}
+        >
+          <Text className="text-muted font-body-medium text-sm">Historique</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-1 bg-surface-elevated border border-border rounded-xl py-3.5 items-center min-h-[48px]"
+          onPress={() => navigation.navigate('Profile')}
+          activeOpacity={0.7}
+        >
+          <Text className="text-muted font-body-medium text-sm">Profil</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  scroll: { flex: 1 },
-  container: {
-    paddingTop: 70,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  title: {
-    fontSize: 32,
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-  menu: { gap: 12 },
-  menuBtn: {
-    borderRadius: 14,
-    padding: 18,
-    minHeight: 48,
-    justifyContent: 'center',
-  },
-  menuBtnText: { fontSize: 17, color: '#fff' },
-  menuBtnSub: { fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 3 },
-  joinSection: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  codeInput: {
-    flex: 1,
-    borderRadius: 12,
-    minHeight: 48,
-    paddingHorizontal: 16,
-    fontSize: 18,
-    textAlign: 'center',
-    letterSpacing: 4,
-    borderWidth: 2,
-  },
-  joinBtn: {
-    borderRadius: 12,
-    paddingHorizontal: 24,
-    justifyContent: 'center',
-    minHeight: 48,
-  },
-  joinBtnText: { color: '#fff', fontSize: 16 },
-  row: { flexDirection: 'row', gap: 10 },
-  halfBtn: {
-    flex: 1,
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 48,
-  },
-  halfBtnText: { color: '#fff', fontSize: 15 },
-});

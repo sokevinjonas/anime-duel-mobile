@@ -1,3 +1,4 @@
+import './src/global.css';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View } from 'react-native';
 import { ApolloProvider } from '@apollo/client/react';

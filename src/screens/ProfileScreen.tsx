@@ -7,6 +7,9 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
+import { PageShell } from '../components/ui/PageShell';
+import { Card } from '../components/ui/Card';
+import { SectionTitle } from '../components/ui/SectionTitle';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -29,7 +32,7 @@ const ME_QUERY = gql`
 export function ProfileScreen() {
   const navigation = useNavigation<Nav>();
   const { logout } = useAuth();
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { data, loading } = useQuery<any>(ME_QUERY);
 
   const handleLogout = async () => {
@@ -39,124 +42,118 @@ export function ProfileScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.text, { color: colors.textSecondary, fontFamily: fonts.body }]}>Chargement...</Text>
-      </View>
+      <PageShell>
+        <Text style={[styles.loading, { color: colors.textSecondary, fontFamily: fonts.body }]}>Chargement...</Text>
+      </PageShell>
     );
   }
 
   const user = data?.me;
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.username, { color: colors.text, fontFamily: fonts.heading }]}>
-        {user?.username}
-      </Text>
-
-      {user?.streakDays > 0 && (
-        <View style={[styles.streakBadge, { backgroundColor: colors.warning + '20' }]}>
-          <Text style={[styles.streakText, { color: colors.warning, fontFamily: fonts.bodySemiBold }]}>
-            {user.streakDays} jours de streak
+    <PageShell>
+      {/* Hero */}
+      <View style={styles.hero}>
+        <View style={[styles.avatarCircle, { backgroundColor: colors.primary + '30' }]}>
+          <Text style={[styles.avatarLetter, { color: colors.primary, fontFamily: fonts.heading }]}>
+            {user?.username?.[0]?.toUpperCase() || '?'}
           </Text>
         </View>
-      )}
-
-      <View style={styles.statsGrid}>
-        <View style={[styles.statBox, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
-          <Text style={[styles.statValue, { color: colors.cta, fontFamily: fonts.heading }]}>{user?.totalWins}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Victoires</Text>
-        </View>
-        <View style={[styles.statBox, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
-          <Text style={[styles.statValue, { color: colors.primary, fontFamily: fonts.heading }]}>{user?.currentLevel}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Niveau</Text>
-        </View>
-        <View style={[styles.statBox, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
-          <Text style={[styles.statValue, { color: colors.warning, fontFamily: fonts.heading }]}>{user?.streakDays}</Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Streak</Text>
-        </View>
+        <Text style={[styles.username, { color: colors.text, fontFamily: fonts.heading }]}>
+          {user?.username}
+        </Text>
+        {user?.streakDays > 0 && (
+          <View style={[styles.streakBadge, { backgroundColor: colors.warning + '20' }]}>
+            <Text style={[styles.streakText, { color: colors.warning, fontFamily: fonts.bodySemiBold }]}>
+              {user.streakDays}j de streak
+            </Text>
+          </View>
+        )}
       </View>
 
-      <View style={[styles.inventoryCard, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
-        <View style={styles.inventoryRow}>
-          <Text style={[styles.inventoryLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Pieces</Text>
-          <Text style={[styles.inventoryValue, { color: colors.warning, fontFamily: fonts.bodyBold }]}>{user?.coins}</Text>
+      {/* Stats KPI */}
+      <SectionTitle>Statistiques</SectionTitle>
+      <View style={styles.statsRow}>
+        <Card elevated style={styles.statCard}>
+          <Text style={[styles.statValue, { color: colors.cta, fontFamily: fonts.heading }]}>{user?.totalWins}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Victoires</Text>
+        </Card>
+        <Card elevated style={styles.statCard}>
+          <Text style={[styles.statValue, { color: colors.primary, fontFamily: fonts.heading }]}>{user?.currentLevel}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Niveau</Text>
+        </Card>
+        <Card elevated style={styles.statCard}>
+          <Text style={[styles.statValue, { color: colors.warning, fontFamily: fonts.heading }]}>T{user?.currentTier}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Palier</Text>
+        </Card>
+      </View>
+
+      {/* Inventaire */}
+      <SectionTitle>Inventaire</SectionTitle>
+      <Card elevated>
+        <View style={styles.inventoryGrid}>
+          <View style={styles.inventoryItem}>
+            <Text style={[styles.inventoryValue, { color: colors.warning, fontFamily: fonts.bodyBold }]}>{user?.coins}</Text>
+            <Text style={[styles.inventoryLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Pieces</Text>
+          </View>
+          <View style={[styles.inventorySep, { backgroundColor: colors.border }]} />
+          <View style={styles.inventoryItem}>
+            <Text style={[styles.inventoryValue, { color: colors.primary, fontFamily: fonts.bodyBold }]}>{user?.jokersCount}</Text>
+            <Text style={[styles.inventoryLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Jokers</Text>
+          </View>
         </View>
-        <View style={[styles.inventorySeparator, { backgroundColor: colors.border }]} />
-        <View style={styles.inventoryRow}>
-          <Text style={[styles.inventoryLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Jokers</Text>
-          <Text style={[styles.inventoryValue, { color: colors.primary, fontFamily: fonts.bodyBold }]}>{user?.jokersCount}</Text>
-        </View>
+      </Card>
+
+      {/* Actions */}
+      <SectionTitle>Raccourcis</SectionTitle>
+      <View style={styles.shortcuts}>
+        <TouchableOpacity
+          style={[styles.shortcut, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+          onPress={() => navigation.navigate('History')}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.bodyMedium }]}>Historique</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.shortcut, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+          onPress={() => navigation.navigate('Shop')}
+          activeOpacity={0.7}
+        >
+          <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.bodyMedium }]}>Boutique</Text>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity
-        style={[styles.logoutBtn, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+        style={[styles.logoutBtn, { borderColor: colors.error, borderWidth: 1 }]}
         onPress={handleLogout}
         activeOpacity={0.8}
       >
         <Text style={[styles.logoutText, { color: colors.error, fontFamily: fonts.bodySemiBold }]}>Deconnexion</Text>
       </TouchableOpacity>
-    </View>
+    </PageShell>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    paddingTop: 80,
-    padding: 24,
-  },
-  text: { fontSize: 16 },
-  username: {
-    fontSize: 26,
-    marginBottom: 12,
-  },
-  streakBadge: {
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    marginBottom: 28,
-  },
-  streakText: { fontSize: 14 },
-  statsGrid: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
-  },
-  statBox: {
-    borderRadius: 14,
-    padding: 16,
-    alignItems: 'center',
-    minWidth: 95,
-  },
-  statValue: {
-    fontSize: 22,
-  },
-  statLabel: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  inventoryCard: {
-    borderRadius: 14,
-    padding: 16,
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  inventoryRow: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  inventoryLabel: { fontSize: 13 },
-  inventoryValue: { fontSize: 20, marginTop: 2 },
-  inventorySeparator: { width: 1, height: 36 },
-  logoutBtn: {
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 12,
-    minHeight: 48,
-    justifyContent: 'center',
-  },
-  logoutText: { fontSize: 16 },
+  loading: { textAlign: 'center', marginTop: 60 },
+  hero: { alignItems: 'center', marginTop: 20, marginBottom: 8 },
+  avatarCircle: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  avatarLetter: { fontSize: 28 },
+  username: { fontSize: 24, marginBottom: 8 },
+  streakBadge: { paddingVertical: 5, paddingHorizontal: 14, borderRadius: 16 },
+  streakText: { fontSize: 13 },
+  statsRow: { flexDirection: 'row', gap: 10 },
+  statCard: { flex: 1, alignItems: 'center', paddingVertical: 18 },
+  statValue: { fontSize: 20, marginBottom: 2 },
+  statLabel: { fontSize: 11 },
+  inventoryGrid: { flexDirection: 'row', alignItems: 'center' },
+  inventoryItem: { flex: 1, alignItems: 'center', paddingVertical: 4 },
+  inventoryValue: { fontSize: 22 },
+  inventoryLabel: { fontSize: 12, marginTop: 2 },
+  inventorySep: { width: 1, height: 32 },
+  shortcuts: { flexDirection: 'row', gap: 10 },
+  shortcut: { flex: 1, borderRadius: 12, paddingVertical: 14, alignItems: 'center', minHeight: 48 },
+  shortcutText: { fontSize: 14 },
+  logoutBtn: { marginTop: 32, borderRadius: 12, paddingVertical: 14, alignItems: 'center', minHeight: 48 },
+  logoutText: { fontSize: 15 },
 });
