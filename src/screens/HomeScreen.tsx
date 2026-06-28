@@ -67,11 +67,51 @@ export function HomeScreen() {
         )}
 
         <TouchableOpacity
+          style={[styles.menuBtn, { backgroundColor: '#8e44ad' }]}
+          onPress={() => navigation.navigate('Solo')}
+        >
+          <Text style={styles.menuBtnText}>Mode Solo</Text>
+          <Text style={styles.menuBtnSub}>Joue contre l'IA</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[styles.menuBtn, styles.catalogBtn]}
           onPress={() => navigation.navigate('Catalog')}
         >
           <Text style={styles.menuBtnText}>Catalogue</Text>
           <Text style={styles.menuBtnSub}>Explore les personnages</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.menuBtn, { backgroundColor: '#f39c12' }]}
+          onPress={() => navigation.navigate('Missions')}
+        >
+          <Text style={styles.menuBtnText}>Missions</Text>
+          <Text style={styles.menuBtnSub}>Tâches journalières</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.menuBtn, { backgroundColor: '#2ecc71' }]}
+          onPress={() => navigation.navigate('Shop')}
+        >
+          <Text style={styles.menuBtnText}>Boutique</Text>
+          <Text style={styles.menuBtnSub}>Jokers & Progression</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.menuBtn, { backgroundColor: '#3498db' }]}
+          onPress={() => navigation.navigate('Leaderboard')}
+        >
+          <Text style={styles.menuBtnText}>Classement</Text>
+          <Text style={styles.menuBtnSub}>Top joueurs</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.menuBtn, { backgroundColor: '#34495e' }]}
+          onPress={() => navigation.navigate('History')}
+        >
+          <Text style={styles.menuBtnText}>Historique</Text>
+          <Text style={styles.menuBtnSub}>Tes anciens matchs</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
