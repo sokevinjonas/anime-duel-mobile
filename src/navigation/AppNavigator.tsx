@@ -8,7 +8,7 @@ import { LoginScreen } from '../screens/LoginScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { CatalogScreen } from '../screens/CatalogScreen';
 import { MatchScreen } from '../screens/MatchScreen';
-import { SoloScreen } from '../screens/SoloScreen';
+import { SocialScreen } from '../screens/SocialScreen';
 import { ShopScreen } from '../screens/ShopScreen';
 import { MissionsScreen } from '../screens/MissionsScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
@@ -30,7 +30,7 @@ export type RootStackParamList = {
 
 export type TabParamList = {
   Home: undefined;
-  Solo: undefined;
+  Social: undefined;
   Leaderboard: undefined;
   Profile: undefined;
 };
@@ -46,7 +46,7 @@ function MainTabs() {
       screenOptions={{ headerShown: false }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Solo" component={SoloScreen} />
+      <Tab.Screen name="Social" component={SocialScreen} />
       <Tab.Screen name="Leaderboard" component={LeaderboardScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

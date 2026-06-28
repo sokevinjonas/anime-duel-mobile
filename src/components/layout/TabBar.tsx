@@ -7,7 +7,7 @@ import { fonts } from '../../theme/fonts';
 
 const TAB_CONFIG: Record<string, { icon: keyof typeof MaterialIcons.glyphMap; label: string }> = {
   Home: { icon: 'home', label: 'Accueil' },
-  Solo: { icon: 'sports-esports', label: 'Solo' },
+  Social: { icon: 'people', label: 'Social' },
   Leaderboard: { icon: 'leaderboard', label: 'Classement' },
   Profile: { icon: 'person', label: 'Profil' },
 };
