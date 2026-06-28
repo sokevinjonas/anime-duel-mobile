@@ -20,7 +20,7 @@ export function ProgressionMap({ currentLevel, maxLevel, onPlayLevel }: Progress
   const scrollRef = useRef<ScrollView>(null);
 
   const totalLevels = maxLevel;
-  const totalHeight = totalLevels * NODE_SPACING + 200;
+  const totalHeight = totalLevels * NODE_SPACING + 250;
 
   useEffect(() => {
     const targetY = (totalLevels - currentLevel) * NODE_SPACING - 200;
@@ -36,7 +36,7 @@ export function ProgressionMap({ currentLevel, maxLevel, onPlayLevel }: Progress
   };
 
   const getNodeY = (index: number) => {
-    return totalHeight - 120 - index * NODE_SPACING;
+    return totalHeight - 190 - index * NODE_SPACING;
   };
 
   const getStatus = (level: number) => {
