@@ -88,24 +88,41 @@ export function ProgressionMap({ currentLevel, maxLevel, onPlayLevel }: Progress
         <CloudEffect width={130} opacity={0.3} color={isDark ? '#2B4150' : '#FFECB3'} />
       </View>
 
-      {/* Locked area clouds (above current level) */}
-      {currentLevel < totalLevels && (
+      {/* Locked area clouds (Palier 1 and above - from level 16+) */}
+      {currentLevel <= 15 && totalLevels > 15 && (
         <View
           style={[
             styles.lockedOverlay,
             {
               top: 0,
-              height: getNodeY(currentLevel + 1) + 40,
+              height: getNodeY(15) + 40,
             },
           ]}
         >
-          <CloudEffect width={SCREEN_WIDTH * 0.8} opacity={0.5} color={isDark ? '#37515E' : '#E0E0E0'} />
-          <View style={{ position: 'absolute', top: 50, left: 20 }}>
-            <CloudEffect width={100} opacity={0.6} color={isDark ? '#37515E' : '#BDBDBD'} />
-          </View>
-          <View style={{ position: 'absolute', top: 30, right: 30 }}>
-            <CloudEffect width={110} opacity={0.5} color={isDark ? '#37515E' : '#CFD8DC'} />
-          </View>
+          {/* Dense cloud coverage for paid tiers */}
+          {Array.from({ length: Math.ceil((getNodeY(15) + 40) / 80) }, (_, i) => {
+            const topPosition = i * 80;
+            const isLeft = i % 2 === 0;
+            const opacity = 0.35 + (i * 0.08);
+            const width = 120 + i * 15;
+
+            return (
+              <View
+                key={`locked-cloud-${i}`}
+                style={{
+                  position: 'absolute',
+                  top: topPosition,
+                  [isLeft ? 'left' : 'right']: 10,
+                }}
+              >
+                <CloudEffect
+                  width={Math.min(width, SCREEN_WIDTH - 20)}
+                  opacity={Math.min(opacity, 0.7)}
+                  color={isDark ? '#37515E' : '#E0E0E0'}
+                />
+              </View>
+            );
+          })}
         </View>
       )}
 

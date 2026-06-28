@@ -18,7 +18,7 @@ export function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   const currentLevel = 7;
-  const maxLevel = 15;
+  const maxLevel = 40; // Palier 0 (15 niveaux) + Palier 1 (25 niveaux)
 
   const handlePlay = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
