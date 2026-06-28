@@ -216,7 +216,7 @@ export function MatchScreen() {
         </Text>
         <TouchableOpacity
           style={styles.backBtn}
-          onPress={() => navigation.replace('Home')}
+          onPress={() => navigation.navigate('MainTabs')}
         >
           <Text style={styles.backBtnText}>Retour à l'accueil</Text>
         </TouchableOpacity>

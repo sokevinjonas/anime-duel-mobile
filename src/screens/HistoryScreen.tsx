@@ -74,7 +74,7 @@ export function HistoryScreen() {
                 <Text
                   style={[
                     styles.resultBadge,
-                    { fontFamily: fonts.bodySemiBold },
+                    { fontFamily: fonts.bodyBold },
                     won
                       ? { backgroundColor: colors.success, color: colors.text }
                       : { backgroundColor: colors.error, color: colors.text },

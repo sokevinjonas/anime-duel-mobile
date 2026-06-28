@@ -58,7 +58,7 @@ export function useAuth() {
   const loadUser = useCallback(async () => {
     const token = await getAccessToken();
     if (token) {
-      const { data } = await fetchMe();
+      const { data } = await fetchMe({ context: { fetchPolicy: 'network-only' } } as any);
       if (data?.me) {
         setUser(data.me);
       }

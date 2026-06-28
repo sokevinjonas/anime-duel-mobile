@@ -9,7 +9,7 @@ interface SectionTitleProps {
 export function SectionTitle({ children }: SectionTitleProps) {
   const { colors } = useTheme();
   return (
-    <Text style={[styles.title, { color: colors.textSecondary, fontFamily: fonts.bodySemiBold }]}>
+    <Text style={[styles.title, { color: colors.textSecondary, fontFamily: fonts.bodyBold }]}>
       {children}
     </Text>
   );

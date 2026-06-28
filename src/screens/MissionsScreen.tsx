@@ -52,10 +52,10 @@ export function MissionsScreen() {
           ]}
         >
           <View style={styles.cardHeader}>
-            <Text style={[styles.missionLabel, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>
+            <Text style={[styles.missionLabel, { color: colors.text, fontFamily: fonts.bodyBold }]}>
               {MISSION_LABELS[m.missionType] || m.missionType}
             </Text>
-            <Text style={[styles.reward, { color: colors.warning, fontFamily: fonts.bodySemiBold }]}>+{m.rewardCoins} pièces</Text>
+            <Text style={[styles.reward, { color: colors.warning, fontFamily: fonts.bodyBold }]}>+{m.rewardCoins} pièces</Text>
           </View>
           <View style={styles.progressRow}>
             <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
@@ -70,7 +70,7 @@ export function MissionsScreen() {
               {m.currentValue}/{m.targetValue}
             </Text>
           </View>
-          {m.completed && <Text style={[styles.completedBadge, { color: colors.success, fontFamily: fonts.bodySemiBold }]}>Complété !</Text>}
+          {m.completed && <Text style={[styles.completedBadge, { color: colors.success, fontFamily: fonts.bodyBold }]}>Complété !</Text>}
         </View>
       ))}
 

@@ -15,7 +15,7 @@ import { useMutation } from '@apollo/client/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { CharacterPicker } from '../components/CharacterPicker';
 
-type Nav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const START_PLAYER_GUESSES = gql`
   mutation StartSoloPlayerGuesses($difficulty: String!, $maxQuestions: Int) {

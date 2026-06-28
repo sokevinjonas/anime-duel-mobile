@@ -1,7 +1,8 @@
 export const fonts = {
-  heading: 'RussoOne_400Regular',
-  body: 'ChakraPetch_400Regular',
-  bodyMedium: 'ChakraPetch_500Medium',
-  bodySemiBold: 'ChakraPetch_600SemiBold',
-  bodyBold: 'ChakraPetch_700Bold',
+  heading: 'Nunito_800ExtraBold',
+  body: 'Nunito_600SemiBold',
+  bodyRegular: 'Nunito_400Regular',
+  bodyBold: 'Nunito_700Bold',
+  bodyExtraBold: 'Nunito_800ExtraBold',
+  bodyBlack: 'Nunito_900Black',
 };

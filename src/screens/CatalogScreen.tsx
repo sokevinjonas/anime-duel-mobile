@@ -57,7 +57,7 @@ export function CatalogScreen() {
               style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
               activeOpacity={0.7}
             >
-              <Text style={[styles.charName, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>{item.name}</Text>
+              <Text style={[styles.charName, { color: colors.text, fontFamily: fonts.bodyBold }]}>{item.name}</Text>
               <Text style={[styles.animeName, { color: colors.cta, fontFamily: fonts.body }]}>{item.anime.title}</Text>
             </TouchableOpacity>
           )}

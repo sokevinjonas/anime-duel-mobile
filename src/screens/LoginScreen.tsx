@@ -15,7 +15,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
 
-type Nav = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export function LoginScreen() {
   const navigation = useNavigation<Nav>();
@@ -29,7 +29,7 @@ export function LoginScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await loginWithOAuth(provider, 'placeholder-token');
-      navigation.replace('Home');
+      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (e: any) {
       Alert.alert('Erreur', e.message);
     }
@@ -49,7 +49,7 @@ export function LoginScreen() {
     try {
       await verifyLoginCode(email, code);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      navigation.replace('Home');
+      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
     } catch (e: any) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Erreur', e.message);
@@ -71,21 +71,21 @@ export function LoginScreen() {
           onPress={() => handleOAuth('GOOGLE')}
           activeOpacity={0.8}
         >
-          <Text style={[styles.btnText, { fontFamily: fonts.bodySemiBold }]}>Google</Text>
+          <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Google</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.oauthBtn, { backgroundColor: '#5865F2' }]}
           onPress={() => handleOAuth('DISCORD')}
           activeOpacity={0.8}
         >
-          <Text style={[styles.btnText, { fontFamily: fonts.bodySemiBold }]}>Discord</Text>
+          <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Discord</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.oauthBtn, { backgroundColor: colors.text }]}
           onPress={() => handleOAuth('APPLE')}
           activeOpacity={0.8}
         >
-          <Text style={[styles.btnText, { fontFamily: fonts.bodySemiBold, color: colors.background }]}>
+          <Text style={[styles.btnText, { fontFamily: fonts.bodyBold, color: colors.background }]}>
             Apple
           </Text>
         </TouchableOpacity>
@@ -113,7 +113,7 @@ export function LoginScreen() {
             onPress={handleSendCode}
             activeOpacity={0.8}
           >
-            <Text style={[styles.btnText, { fontFamily: fonts.bodySemiBold }]}>Recevoir un code</Text>
+            <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Recevoir un code</Text>
           </TouchableOpacity>
         ) : (
           <>
@@ -131,7 +131,7 @@ export function LoginScreen() {
               onPress={handleVerifyCode}
               activeOpacity={0.8}
             >
-              <Text style={[styles.btnText, { fontFamily: fonts.bodySemiBold }]}>Verifier</Text>
+              <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Verifier</Text>
             </TouchableOpacity>
           </>
         )}

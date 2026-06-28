@@ -57,7 +57,7 @@ export function Button({
       onPress={handlePress}
       activeOpacity={0.8}
     >
-      <Text style={[styles.title, { color: textColors[variant], fontFamily: fonts.bodySemiBold }]}>
+      <Text style={[styles.title, { color: textColors[variant], fontFamily: fonts.bodyBold }]}>
         {title}
       </Text>
       {subtitle && (

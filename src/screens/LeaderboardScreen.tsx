@@ -36,7 +36,7 @@ export function LeaderboardScreen() {
       <Text style={[styles.title, { color: colors.text, fontFamily: fonts.heading }]}>Classement</Text>
       {myRank && (
         <View style={[styles.myRankCard, { backgroundColor: colors.surface, borderColor: colors.cta }]}>
-          <Text style={[styles.myRankText, { color: colors.cta, fontFamily: fonts.bodySemiBold }]}>Ta position : #{myRank}</Text>
+          <Text style={[styles.myRankText, { color: colors.cta, fontFamily: fonts.bodyBold }]}>Ta position : #{myRank}</Text>
         </View>
       )}
       <FlatList
@@ -44,11 +44,11 @@ export function LeaderboardScreen() {
         keyExtractor={(item: any) => item.id}
         renderItem={({ item, index }: { item: any; index: number }) => (
           <View style={[styles.row, { borderBottomColor: colors.border }]}>
-            <Text style={[styles.rank, { color: colors.textMuted, fontFamily: fonts.bodySemiBold }, index < 3 && { color: colors.warning }]}>
+            <Text style={[styles.rank, { color: colors.textMuted, fontFamily: fonts.bodyBold }, index < 3 && { color: colors.warning }]}>
               #{index + 1}
             </Text>
             <View style={styles.playerInfo}>
-              <Text style={[styles.username, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>{item.username}</Text>
+              <Text style={[styles.username, { color: colors.text, fontFamily: fonts.bodyBold }]}>{item.username}</Text>
               <Text style={[styles.level, { color: colors.textMuted, fontFamily: fonts.body }]}>Niv. {item.currentLevel}</Text>
             </View>
             <Text style={[styles.wins, { color: colors.success, fontFamily: fonts.bodyBold }]}>{item.totalWins} W</Text>

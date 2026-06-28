@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { RootStackParamList, TabParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
@@ -11,7 +11,7 @@ import { PageShell } from '../components/ui/PageShell';
 import { Card } from '../components/ui/Card';
 import { SectionTitle } from '../components/ui/SectionTitle';
 
-type Nav = NativeStackNavigationProp<RootStackParamList, 'Profile'>;
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const ME_QUERY = gql`
   query Me {
@@ -37,7 +37,7 @@ export function ProfileScreen() {
 
   const handleLogout = async () => {
     await logout();
-    navigation.replace('Login');
+    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
   if (loading) {
@@ -64,7 +64,7 @@ export function ProfileScreen() {
         </Text>
         {user?.streakDays > 0 && (
           <View style={[styles.streakBadge, { backgroundColor: colors.warning + '20' }]}>
-            <Text style={[styles.streakText, { color: colors.warning, fontFamily: fonts.bodySemiBold }]}>
+            <Text style={[styles.streakText, { color: colors.warning, fontFamily: fonts.bodyBold }]}>
               {user.streakDays}j de streak
             </Text>
           </View>
@@ -109,17 +109,17 @@ export function ProfileScreen() {
       <View style={styles.shortcuts}>
         <TouchableOpacity
           style={[styles.shortcut, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
-          onPress={() => navigation.navigate('History')}
+          onPress={() => navigation.navigate('History' as any)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.bodyMedium }]}>Historique</Text>
+          <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.body }]}>Historique</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.shortcut, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
-          onPress={() => navigation.navigate('Shop')}
+          onPress={() => navigation.navigate('Shop' as any)}
           activeOpacity={0.7}
         >
-          <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.bodyMedium }]}>Boutique</Text>
+          <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.body }]}>Boutique</Text>
         </TouchableOpacity>
       </View>
 
@@ -128,7 +128,7 @@ export function ProfileScreen() {
         onPress={handleLogout}
         activeOpacity={0.8}
       >
-        <Text style={[styles.logoutText, { color: colors.error, fontFamily: fonts.bodySemiBold }]}>Deconnexion</Text>
+        <Text style={[styles.logoutText, { color: colors.error, fontFamily: fonts.bodyBold }]}>Deconnexion</Text>
       </TouchableOpacity>
     </PageShell>
   );

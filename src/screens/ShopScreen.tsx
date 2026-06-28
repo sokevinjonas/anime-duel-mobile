@@ -81,23 +81,23 @@ export function ShopScreen() {
       <View style={[styles.balanceCard, { backgroundColor: colors.surface }]}>
         <Text style={[styles.balanceLabel, { color: colors.textMuted, fontFamily: fonts.body }]}>Ton solde</Text>
         <Text style={[styles.balanceValue, { color: colors.warning, fontFamily: fonts.bodyBold }]}>{prog.coins} pièces</Text>
-        <Text style={[styles.jokersValue, { color: colors.primary, fontFamily: fonts.bodySemiBold }]}>{prog.jokersCount} jokers</Text>
+        <Text style={[styles.jokersValue, { color: colors.primary, fontFamily: fonts.bodyBold }]}>{prog.jokersCount} jokers</Text>
       </View>
 
       <View style={[styles.section, { backgroundColor: colors.surface }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>Acheter un Joker</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>Acheter un Joker</Text>
         <Text style={[styles.sectionDesc, { color: colors.textMuted, fontFamily: fonts.body }]}>Élimine un groupe de personnages en match</Text>
         <TouchableOpacity
           activeOpacity={0.8}
           style={[styles.buyBtn, { backgroundColor: colors.primary, minHeight: 48 }]}
           onPress={handleBuyJoker}
         >
-          <Text style={[styles.buyBtnText, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>50 pièces → 1 Joker</Text>
+          <Text style={[styles.buyBtnText, { color: colors.text, fontFamily: fonts.bodyBold }]}>50 pièces → 1 Joker</Text>
         </TouchableOpacity>
       </View>
 
       <View style={[styles.section, { backgroundColor: colors.surface }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>Arbre de progression</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>Arbre de progression</Text>
         <Text style={[styles.tierInfo, { color: colors.textMuted, fontFamily: fonts.body }]}>
           Palier {prog.currentTier} • Niveau {prog.currentLevel}/{prog.maxLevelForTier}
         </Text>
@@ -109,7 +109,7 @@ export function ShopScreen() {
               style={[styles.unlockBtn, { backgroundColor: colors.cta, minHeight: 48 }]}
               onPress={handleUnlockTier}
             >
-              <Text style={[styles.unlockBtnText, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>
+              <Text style={[styles.unlockBtnText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                 Débloquer palier {prog.currentTier + 1} ({prog.nextTierCost} pièces)
               </Text>
             </TouchableOpacity>

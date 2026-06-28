@@ -1,5 +1,8 @@
+import { useState, useEffect } from 'react';
+import { ActivityIndicator, View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HomeScreen } from '../screens/HomeScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -10,36 +13,115 @@ import { ShopScreen } from '../screens/ShopScreen';
 import { MissionsScreen } from '../screens/MissionsScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { HistoryScreen } from '../screens/HistoryScreen';
+import { getAccessToken } from '../services/auth';
+import { useTheme } from '../theme/ThemeContext';
+import { fonts } from '../theme/fonts';
+import { TabBar } from '../components/layout/TabBar';
 
 export type RootStackParamList = {
   Login: undefined;
-  Home: undefined;
-  Profile: undefined;
-  Catalog: undefined;
+  MainTabs: undefined;
   Match: { matchId?: string; roomCode?: string };
-  Solo: undefined;
+  Catalog: undefined;
   Shop: undefined;
   Missions: undefined;
-  Leaderboard: undefined;
   History: undefined;
 };
 
+export type TabParamList = {
+  Home: undefined;
+  Solo: undefined;
+  Leaderboard: undefined;
+  Profile: undefined;
+};
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
+
+
+function MainTabs() {
+  return (
+    <Tab.Navigator
+      tabBar={(props) => <TabBar {...props} />}
+      screenOptions={{ headerShown: false }}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Solo" component={SoloScreen} />
+      <Tab.Screen name="Leaderboard" component={LeaderboardScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
+    </Tab.Navigator>
+  );
+}
 
 export function AppNavigator() {
+  const { colors } = useTheme();
+  const [isReady, setIsReady] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    async function checkAuth() {
+      const token = await getAccessToken();
+      setIsLoggedIn(!!token);
+      setIsReady(true);
+    }
+    checkAuth();
+  }, []);
+
+  if (!isReady) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="Catalog" component={CatalogScreen} />
-        <Stack.Screen name="Match" component={MatchScreen} />
-        <Stack.Screen name="Solo" component={SoloScreen} />
-        <Stack.Screen name="Shop" component={ShopScreen} />
-        <Stack.Screen name="Missions" component={MissionsScreen} />
-        <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
-        <Stack.Screen name="History" component={HistoryScreen} />
+      <Stack.Navigator
+        initialRouteName={isLoggedIn ? 'MainTabs' : 'Login'}
+        screenOptions={{
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.text,
+          headerTitleStyle: { fontFamily: fonts.bodyBold },
+          headerShadowVisible: false,
+          headerBackTitle: 'Retour',
+        }}
+      >
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="MainTabs"
+          component={MainTabs}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Match"
+          component={MatchScreen}
+          options={{ title: 'Match' }}
+        />
+        <Stack.Screen
+          name="Catalog"
+          component={CatalogScreen}
+          options={{ title: 'Catalogue' }}
+        />
+        <Stack.Screen
+          name="Shop"
+          component={ShopScreen}
+          options={{ title: 'Boutique' }}
+        />
+        <Stack.Screen
+          name="Missions"
+          component={MissionsScreen}
+          options={{ title: 'Missions' }}
+        />
+        <Stack.Screen
+          name="History"
+          component={HistoryScreen}
+          options={{ title: 'Historique' }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
