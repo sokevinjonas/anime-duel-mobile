@@ -1,9 +1,11 @@
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { gql } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
@@ -12,19 +14,47 @@ import { ProgressionMap } from '../components/progression/ProgressionMap';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
+const ME_QUERY = gql`
+  query Me {
+    me {
+      id
+      currentLevel
+      currentTier
+    }
+  }
+`;
+
 export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const { data, loading } = useQuery<any>(ME_QUERY);
 
-  const currentLevel = 7;
-  const maxLevel = 40; // Palier 0 (15 niveaux) + Palier 1 (25 niveaux)
+  const currentLevel = data?.me?.currentLevel || 1;
+  const currentTier = data?.me?.currentTier || 0;
+
+  // Calculer maxLevel selon le palier actuel
+  // Palier 0 = 15 niveaux, Palier 1+ = 25 niveaux chacun
+  const getMaxLevel = (tier: number) => {
+    if (tier === 0) return 15;
+    return 15 + (tier * 25);
+  };
+
+  const maxLevel = getMaxLevel(currentTier + 1); // Afficher jusqu'au palier suivant
 
   const handlePlay = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     // TODO: call backend mutation startSoloPlayerGuesses with level-based difficulty
     console.log(`Starting match at level ${currentLevel}`);
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

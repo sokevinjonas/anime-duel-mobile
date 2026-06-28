@@ -6,8 +6,8 @@ import { LevelNode } from './LevelNode';
 import { CloudEffect } from './CloudEffect';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const NODE_SPACING = 90;
-const PATH_AMPLITUDE = 60;
+const NODE_SPACING = 110; // Plus d'espace pour que la ligne ne touche pas les chiffres
+const PATH_AMPLITUDE = SCREEN_WIDTH * 0.30; // Courbes moins larges
 
 interface ProgressionMapProps {
   currentLevel: number;
@@ -31,7 +31,8 @@ export function ProgressionMap({ currentLevel, maxLevel, onPlayLevel }: Progress
 
   const getNodeX = (index: number) => {
     const centerX = SCREEN_WIDTH / 2;
-    const offset = Math.sin(index * 0.8) * PATH_AMPLITUDE;
+    // Zigzag avec courbes plus douces pour éviter que la ligne touche les chiffres
+    const offset = Math.sin(index * 1.0) * PATH_AMPLITUDE;
     return centerX + offset;
   };
 

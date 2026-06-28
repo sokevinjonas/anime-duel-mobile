@@ -80,7 +80,7 @@ export function SocialScreen() {
             darkColor={colors.orangeDark}
             onPress={handleJoin}
             size="small"
-            style={{ paddingHorizontal: 16, minWidth: 60 }}
+            style={{ paddingHorizontal: 20, minWidth: 70 }}
           />
         </View>
       </View>
@@ -118,14 +118,14 @@ const styles = StyleSheet.create({
   cardDesc: { fontSize: 14, lineHeight: 20 },
   joinRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   codeInput: {
-    flex: 1,
+    width: 180,
     borderRadius: 12,
     borderWidth: 2,
     minHeight: 48,
-    paddingHorizontal: 16,
-    fontSize: 20,
+    paddingHorizontal: 12,
+    fontSize: 18,
     textAlign: 'center',
-    letterSpacing: 6,
+    letterSpacing: 4,
   },
   infoCard: {
     borderRadius: 16,

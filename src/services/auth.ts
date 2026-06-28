@@ -33,7 +33,27 @@ export async function saveTokens(accessToken: string, refreshToken: string) {
 }
 
 export async function getAccessToken(): Promise<string | null> {
-  return storage.get(ACCESS_TOKEN_KEY);
+  const token = await storage.get(ACCESS_TOKEN_KEY);
+
+  // Vérifier si le token est expiré
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+
+      if (payload.exp && payload.exp < now) {
+        // Token expiré, nettoyer
+        await clearTokens();
+        return null;
+      }
+    } catch (error) {
+      // Token invalide, nettoyer
+      await clearTokens();
+      return null;
+    }
+  }
+
+  return token;
 }
 
 export async function getRefreshToken(): Promise<string | null> {

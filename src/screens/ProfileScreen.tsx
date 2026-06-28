@@ -33,7 +33,15 @@ export function ProfileScreen() {
   const navigation = useNavigation<Nav>();
   const { logout } = useAuth();
   const { colors } = useTheme();
-  const { data, loading } = useQuery<any>(ME_QUERY);
+  const { data, loading, error } = useQuery<any>(ME_QUERY, {
+    onError: async (err) => {
+      // Si erreur d'auth, déconnecter automatiquement
+      if (err.message.includes('Unauthorized') || err.message.includes('UNAUTHENTICATED')) {
+        await logout();
+        navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+      }
+    },
+  });
 
   const handleLogout = async () => {
     await logout();

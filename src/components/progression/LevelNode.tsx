@@ -90,12 +90,19 @@ export function LevelNode({ level, status, isMilestone = false, milestoneStars =
 }
 
 const styles = StyleSheet.create({
-  nodeWrapper: { alignItems: 'center', gap: 4 },
+  nodeWrapper: { alignItems: 'center', gap: 10 },
   node: {
     borderRadius: 50,
     borderWidth: 3,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  levelText: { fontSize: 16, fontWeight: '700' },
+  levelText: {
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 3,
+  },
 });
