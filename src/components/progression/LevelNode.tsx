@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../../theme/ThemeContext';
 import { fonts } from '../../theme/fonts';
@@ -53,13 +54,13 @@ export function LevelNode({ level, status, isMilestone = false, milestoneStars =
           ]}
         >
           {status === 'completed' && (
-            <Text style={[styles.checkmark, { fontFamily: fonts.bodyBold }]}>&#x2713;</Text>
+            <MaterialIcons name="check" size={24} color="#FFF" />
           )}
           {status === 'current' && (
-            <Text style={[styles.currentIcon, { fontFamily: fonts.bodyExtraBold }]}>&#x25B6;</Text>
+            <MaterialIcons name="play-arrow" size={20} color="#FFF" />
           )}
           {status === 'locked' && (
-            <Text style={styles.lockIcon}>&#x1F512;</Text>
+            <MaterialIcons name="lock" size={20} color={colors.textMuted} />
           )}
         </View>
       )}
@@ -96,8 +97,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkmark: { color: '#FFF', fontSize: 18 },
-  currentIcon: { color: '#FFF', fontSize: 14 },
-  lockIcon: { fontSize: 16 },
-  levelText: { fontSize: 11 },
+  levelText: { fontSize: 16, fontWeight: '700' },
 });

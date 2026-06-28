@@ -69,7 +69,7 @@ export function ProgressionMap({ currentLevel, maxLevel, onPlayLevel }: Progress
     <ScrollView
       ref={scrollRef}
       style={styles.container}
-      contentContainerStyle={{ height: totalHeight }}
+      contentContainerStyle={{ height: totalHeight, paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
     >
       {/* Background gradient effect */}
