@@ -5,6 +5,8 @@ import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../theme/ThemeContext';
+import { fonts } from '../theme/fonts';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -27,6 +29,7 @@ const ME_QUERY = gql`
 export function ProfileScreen() {
   const navigation = useNavigation<Nav>();
   const { logout } = useAuth();
+  const { colors, isDark } = useTheme();
   const { data, loading } = useQuery<any>(ME_QUERY);
 
   const handleLogout = async () => {
@@ -36,8 +39,8 @@ export function ProfileScreen() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.text}>Chargement...</Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.text, { color: colors.textSecondary, fontFamily: fonts.body }]}>Chargement...</Text>
       </View>
     );
   }
@@ -45,31 +48,52 @@ export function ProfileScreen() {
   const user = data?.me;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.username}>{user?.username}</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.username, { color: colors.text, fontFamily: fonts.heading }]}>
+        {user?.username}
+      </Text>
+
+      {user?.streakDays > 0 && (
+        <View style={[styles.streakBadge, { backgroundColor: colors.warning + '20' }]}>
+          <Text style={[styles.streakText, { color: colors.warning, fontFamily: fonts.bodySemiBold }]}>
+            {user.streakDays} jours de streak
+          </Text>
+        </View>
+      )}
 
       <View style={styles.statsGrid}>
-        <View style={styles.statBox}>
-          <Text style={styles.statValue}>{user?.totalWins}</Text>
-          <Text style={styles.statLabel}>Victoires</Text>
+        <View style={[styles.statBox, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
+          <Text style={[styles.statValue, { color: colors.cta, fontFamily: fonts.heading }]}>{user?.totalWins}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Victoires</Text>
         </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statValue}>{user?.currentLevel}</Text>
-          <Text style={styles.statLabel}>Niveau</Text>
+        <View style={[styles.statBox, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
+          <Text style={[styles.statValue, { color: colors.primary, fontFamily: fonts.heading }]}>{user?.currentLevel}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Niveau</Text>
         </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statValue}>{user?.streakDays}</Text>
-          <Text style={styles.statLabel}>Streak</Text>
+        <View style={[styles.statBox, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
+          <Text style={[styles.statValue, { color: colors.warning, fontFamily: fonts.heading }]}>{user?.streakDays}</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Streak</Text>
         </View>
       </View>
 
-      <View style={styles.inventoryRow}>
-        <Text style={styles.inventoryText}>🪙 {user?.coins} pièces</Text>
-        <Text style={styles.inventoryText}>🃏 {user?.jokersCount} jokers</Text>
+      <View style={[styles.inventoryCard, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}>
+        <View style={styles.inventoryRow}>
+          <Text style={[styles.inventoryLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Pieces</Text>
+          <Text style={[styles.inventoryValue, { color: colors.warning, fontFamily: fonts.bodyBold }]}>{user?.coins}</Text>
+        </View>
+        <View style={[styles.inventorySeparator, { backgroundColor: colors.border }]} />
+        <View style={styles.inventoryRow}>
+          <Text style={[styles.inventoryLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>Jokers</Text>
+          <Text style={[styles.inventoryValue, { color: colors.primary, fontFamily: fonts.bodyBold }]}>{user?.jokersCount}</Text>
+        </View>
       </View>
 
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Déconnexion</Text>
+      <TouchableOpacity
+        style={[styles.logoutBtn, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+        onPress={handleLogout}
+        activeOpacity={0.8}
+      >
+        <Text style={[styles.logoutText, { color: colors.error, fontFamily: fonts.bodySemiBold }]}>Deconnexion</Text>
       </TouchableOpacity>
     </View>
   );
@@ -79,56 +103,60 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#1a1a2e',
     paddingTop: 80,
     padding: 24,
   },
-  text: { color: '#fff', fontSize: 16 },
+  text: { fontSize: 16 },
   username: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 32,
+    fontSize: 26,
+    marginBottom: 12,
   },
+  streakBadge: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginBottom: 28,
+  },
+  streakText: { fontSize: 14 },
   statsGrid: {
     flexDirection: 'row',
-    gap: 16,
-    marginBottom: 32,
+    gap: 12,
+    marginBottom: 24,
   },
   statBox: {
-    backgroundColor: '#16213e',
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 16,
     alignItems: 'center',
-    minWidth: 90,
+    minWidth: 95,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#e94560',
+    fontSize: 22,
   },
   statLabel: {
     fontSize: 12,
-    color: '#aaa',
     marginTop: 4,
   },
-  inventoryRow: {
+  inventoryCard: {
+    borderRadius: 14,
+    padding: 16,
+    width: '100%',
     flexDirection: 'row',
-    gap: 24,
-    marginBottom: 40,
+    alignItems: 'center',
+    marginBottom: 32,
   },
-  inventoryText: {
-    fontSize: 16,
-    color: '#fff',
+  inventoryRow: {
+    flex: 1,
+    alignItems: 'center',
   },
+  inventoryLabel: { fontSize: 13 },
+  inventoryValue: { fontSize: 20, marginTop: 2 },
+  inventorySeparator: { width: 1, height: 36 },
   logoutBtn: {
-    backgroundColor: '#333',
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 32,
-    borderRadius: 8,
+    borderRadius: 12,
+    minHeight: 48,
+    justifyContent: 'center',
   },
-  logoutText: {
-    color: '#e94560',
-    fontSize: 16,
-  },
+  logoutText: { fontSize: 16 },
 });

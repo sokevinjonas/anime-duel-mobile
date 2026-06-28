@@ -6,19 +6,25 @@ import {
   TextInput,
   StyleSheet,
   Alert,
+  ScrollView,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { useTheme } from '../theme/ThemeContext';
+import { fonts } from '../theme/fonts';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 export function HomeScreen() {
   const navigation = useNavigation<Nav>();
+  const { colors } = useTheme();
   const [showJoinInput, setShowJoinInput] = useState(false);
   const [roomCode, setRoomCode] = useState('');
 
   const handleCreateMatch = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     navigation.navigate('Match', {});
   };
 
@@ -27,152 +33,174 @@ export function HomeScreen() {
       Alert.alert('Erreur', 'Entre un code de room');
       return;
     }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     navigation.navigate('Match', { roomCode: roomCode.trim().toUpperCase() });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Anime Duel</Text>
+    <ScrollView
+      style={[styles.scroll, { backgroundColor: colors.background }]}
+      contentContainerStyle={styles.container}
+    >
+      <Text style={[styles.title, { color: colors.cta, fontFamily: fonts.heading }]}>
+        ANIME DUEL
+      </Text>
 
       <View style={styles.menu}>
-        <TouchableOpacity style={styles.menuBtn} onPress={handleCreateMatch}>
-          <Text style={styles.menuBtnText}>Créer un match</Text>
-          <Text style={styles.menuBtnSub}>Invite un ami avec un code</Text>
+        <TouchableOpacity
+          style={[styles.menuBtn, { backgroundColor: colors.cta }]}
+          onPress={handleCreateMatch}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.menuBtnText, { fontFamily: fonts.bodySemiBold }]}>Creer un match</Text>
+          <Text style={[styles.menuBtnSub, { fontFamily: fonts.body }]}>Invite un ami avec un code</Text>
         </TouchableOpacity>
 
         {!showJoinInput ? (
           <TouchableOpacity
-            style={[styles.menuBtn, styles.secondaryBtn]}
+            style={[styles.menuBtn, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cta }]}
             onPress={() => setShowJoinInput(true)}
+            activeOpacity={0.8}
           >
-            <Text style={styles.menuBtnText}>Rejoindre un match</Text>
-            <Text style={styles.menuBtnSub}>Entre le code d'un ami</Text>
+            <Text style={[styles.menuBtnText, { color: colors.cta, fontFamily: fonts.bodySemiBold }]}>Rejoindre un match</Text>
+            <Text style={[styles.menuBtnSub, { color: colors.textSecondary, fontFamily: fonts.body }]}>Entre le code d'un ami</Text>
           </TouchableOpacity>
         ) : (
           <View style={styles.joinSection}>
             <TextInput
-              style={styles.codeInput}
+              style={[styles.codeInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.cta, fontFamily: fonts.bodyBold }]}
               placeholder="CODE"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.textMuted}
               value={roomCode}
               onChangeText={setRoomCode}
               autoCapitalize="characters"
               maxLength={6}
               autoFocus
             />
-            <TouchableOpacity style={styles.joinBtn} onPress={handleJoinMatch}>
-              <Text style={styles.joinBtnText}>Rejoindre</Text>
+            <TouchableOpacity
+              style={[styles.joinBtn, { backgroundColor: colors.cta }]}
+              onPress={handleJoinMatch}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.joinBtnText, { fontFamily: fonts.bodySemiBold }]}>Go</Text>
             </TouchableOpacity>
           </View>
         )}
 
         <TouchableOpacity
-          style={[styles.menuBtn, { backgroundColor: '#8e44ad' }]}
+          style={[styles.menuBtn, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate('Solo')}
+          activeOpacity={0.8}
         >
-          <Text style={styles.menuBtnText}>Mode Solo</Text>
-          <Text style={styles.menuBtnSub}>Joue contre l'IA</Text>
+          <Text style={[styles.menuBtnText, { fontFamily: fonts.bodySemiBold }]}>Mode Solo</Text>
+          <Text style={[styles.menuBtnSub, { fontFamily: fonts.body }]}>Joue contre l'IA</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.menuBtn, styles.catalogBtn]}
+          style={[styles.menuBtn, { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border }]}
           onPress={() => navigation.navigate('Catalog')}
+          activeOpacity={0.8}
         >
-          <Text style={styles.menuBtnText}>Catalogue</Text>
-          <Text style={styles.menuBtnSub}>Explore les personnages</Text>
+          <Text style={[styles.menuBtnText, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>Catalogue</Text>
+          <Text style={[styles.menuBtnSub, { color: colors.textSecondary, fontFamily: fonts.body }]}>Explore les personnages</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.menuBtn, { backgroundColor: '#f39c12' }]}
-          onPress={() => navigation.navigate('Missions')}
-        >
-          <Text style={styles.menuBtnText}>Missions</Text>
-          <Text style={styles.menuBtnSub}>Tâches journalières</Text>
-        </TouchableOpacity>
+        <View style={styles.row}>
+          <TouchableOpacity
+            style={[styles.halfBtn, { backgroundColor: colors.warning }]}
+            onPress={() => navigation.navigate('Missions')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.halfBtnText, { fontFamily: fonts.bodySemiBold }]}>Missions</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.halfBtn, { backgroundColor: colors.success }]}
+            onPress={() => navigation.navigate('Shop')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.halfBtnText, { fontFamily: fonts.bodySemiBold }]}>Boutique</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.row}>
+          <TouchableOpacity
+            style={[styles.halfBtn, { backgroundColor: '#3498db' }]}
+            onPress={() => navigation.navigate('Leaderboard')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.halfBtnText, { fontFamily: fonts.bodySemiBold }]}>Classement</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.halfBtn, { backgroundColor: colors.surfaceElevated, borderWidth: 1, borderColor: colors.border }]}
+            onPress={() => navigation.navigate('History')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.halfBtnText, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>Historique</Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
-          style={[styles.menuBtn, { backgroundColor: '#2ecc71' }]}
-          onPress={() => navigation.navigate('Shop')}
-        >
-          <Text style={styles.menuBtnText}>Boutique</Text>
-          <Text style={styles.menuBtnSub}>Jokers & Progression</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.menuBtn, { backgroundColor: '#3498db' }]}
-          onPress={() => navigation.navigate('Leaderboard')}
-        >
-          <Text style={styles.menuBtnText}>Classement</Text>
-          <Text style={styles.menuBtnSub}>Top joueurs</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.menuBtn, { backgroundColor: '#34495e' }]}
-          onPress={() => navigation.navigate('History')}
-        >
-          <Text style={styles.menuBtnText}>Historique</Text>
-          <Text style={styles.menuBtnSub}>Tes anciens matchs</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.menuBtn, styles.profileBtn]}
+          style={[styles.menuBtn, { backgroundColor: colors.surfaceElevated }]}
           onPress={() => navigation.navigate('Profile')}
+          activeOpacity={0.8}
         >
-          <Text style={styles.menuBtnText}>Mon Profil</Text>
+          <Text style={[styles.menuBtnText, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>Mon Profil</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scroll: { flex: 1 },
   container: {
-    flex: 1,
-    backgroundColor: '#1a1a2e',
-    paddingTop: 80,
-    paddingHorizontal: 24,
+    paddingTop: 70,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#e94560',
     textAlign: 'center',
-    marginBottom: 48,
+    marginBottom: 32,
   },
-  menu: { gap: 16 },
+  menu: { gap: 12 },
   menuBtn: {
-    backgroundColor: '#e94560',
-    borderRadius: 12,
-    padding: 20,
+    borderRadius: 14,
+    padding: 18,
+    minHeight: 48,
+    justifyContent: 'center',
   },
-  secondaryBtn: { backgroundColor: '#16213e', borderWidth: 1, borderColor: '#e94560' },
-  catalogBtn: { backgroundColor: '#16213e' },
-  profileBtn: { backgroundColor: '#333' },
-  menuBtnText: { fontSize: 18, fontWeight: '600', color: '#fff' },
-  menuBtnSub: { fontSize: 13, color: '#ccc', marginTop: 4 },
+  menuBtnText: { fontSize: 17, color: '#fff' },
+  menuBtnSub: { fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 3 },
   joinSection: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
   codeInput: {
     flex: 1,
-    backgroundColor: '#16213e',
-    borderRadius: 8,
-    paddingVertical: 14,
+    borderRadius: 12,
+    minHeight: 48,
     paddingHorizontal: 16,
-    color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
     textAlign: 'center',
     letterSpacing: 4,
-    borderWidth: 1,
-    borderColor: '#e94560',
+    borderWidth: 2,
   },
   joinBtn: {
-    backgroundColor: '#e94560',
-    borderRadius: 8,
-    paddingHorizontal: 20,
+    borderRadius: 12,
+    paddingHorizontal: 24,
     justifyContent: 'center',
+    minHeight: 48,
   },
-  joinBtnText: { color: '#fff', fontWeight: '600' },
+  joinBtnText: { color: '#fff', fontSize: 16 },
+  row: { flexDirection: 'row', gap: 10 },
+  halfBtn: {
+    flex: 1,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 48,
+  },
+  halfBtnText: { color: '#fff', fontSize: 15 },
 });

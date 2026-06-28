@@ -7,23 +7,27 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../theme/ThemeContext';
+import { fonts } from '../theme/fonts';
 
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
 export function LoginScreen() {
   const navigation = useNavigation<Nav>();
   const { loginWithOAuth, sendLoginCode, verifyLoginCode } = useAuth();
+  const { colors } = useTheme();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [codeSent, setCodeSent] = useState(false);
 
   const handleOAuth = async (provider: string) => {
     try {
-      // TODO: implement real OAuth flow with expo-auth-session
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       await loginWithOAuth(provider, 'placeholder-token');
       navigation.replace('Home');
     } catch (e: any) {
@@ -35,6 +39,7 @@ export function LoginScreen() {
     try {
       await sendLoginCode(email);
       setCodeSent(true);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e: any) {
       Alert.alert('Erreur', e.message);
     }
@@ -43,71 +48,90 @@ export function LoginScreen() {
   const handleVerifyCode = async () => {
     try {
       await verifyLoginCode(email, code);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       navigation.replace('Home');
     } catch (e: any) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Erreur', e.message);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Anime Duel</Text>
-      <Text style={styles.subtitle}>Devine le personnage !</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.cta, fontFamily: fonts.heading }]}>
+        ANIME DUEL
+      </Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+        Devine le personnage !
+      </Text>
 
       <View style={styles.oauthSection}>
         <TouchableOpacity
           style={[styles.oauthBtn, { backgroundColor: '#4285F4' }]}
           onPress={() => handleOAuth('GOOGLE')}
+          activeOpacity={0.8}
         >
-          <Text style={styles.btnText}>Google</Text>
+          <Text style={[styles.btnText, { fontFamily: fonts.bodySemiBold }]}>Google</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.oauthBtn, { backgroundColor: '#5865F2' }]}
           onPress={() => handleOAuth('DISCORD')}
+          activeOpacity={0.8}
         >
-          <Text style={styles.btnText}>Discord</Text>
+          <Text style={[styles.btnText, { fontFamily: fonts.bodySemiBold }]}>Discord</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.oauthBtn, { backgroundColor: '#000' }]}
+          style={[styles.oauthBtn, { backgroundColor: colors.text }]}
           onPress={() => handleOAuth('APPLE')}
+          activeOpacity={0.8}
         >
-          <Text style={styles.btnText}>Apple</Text>
+          <Text style={[styles.btnText, { fontFamily: fonts.bodySemiBold, color: colors.background }]}>
+            Apple
+          </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.divider}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>ou</Text>
-        <View style={styles.dividerLine} />
+        <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+        <Text style={[styles.dividerText, { color: colors.textMuted, fontFamily: fonts.body }]}>ou</Text>
+        <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
       </View>
 
       <View style={styles.emailSection}>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, fontFamily: fonts.body }]}
           placeholder="Email"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.textMuted}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
         {!codeSent ? (
-          <TouchableOpacity style={styles.primaryBtn} onPress={handleSendCode}>
-            <Text style={styles.btnText}>Recevoir un code</Text>
+          <TouchableOpacity
+            style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
+            onPress={handleSendCode}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.btnText, { fontFamily: fonts.bodySemiBold }]}>Recevoir un code</Text>
           </TouchableOpacity>
         ) : (
           <>
             <TextInput
-              style={styles.input}
-              placeholder="Code à 6 chiffres"
-              placeholderTextColor="#666"
+              style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, fontFamily: fonts.body }]}
+              placeholder="Code a 6 chiffres"
+              placeholderTextColor={colors.textMuted}
               value={code}
               onChangeText={setCode}
               keyboardType="number-pad"
               maxLength={6}
             />
-            <TouchableOpacity style={styles.primaryBtn} onPress={handleVerifyCode}>
-              <Text style={styles.btnText}>Vérifier</Text>
+            <TouchableOpacity
+              style={[styles.primaryBtn, { backgroundColor: colors.cta }]}
+              onPress={handleVerifyCode}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.btnText, { fontFamily: fonts.bodySemiBold }]}>Verifier</Text>
             </TouchableOpacity>
           </>
         )}
@@ -121,18 +145,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1a1a2e',
     padding: 24,
   },
   title: {
     fontSize: 36,
-    fontWeight: 'bold',
-    color: '#e94560',
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#aaa',
     marginBottom: 40,
   },
   oauthSection: {
@@ -141,14 +161,14 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   oauthBtn: {
-    paddingVertical: 14,
-    borderRadius: 8,
+    minHeight: 48,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   btnText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
   },
   divider: {
     flexDirection: 'row',
@@ -159,10 +179,8 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#333',
   },
   dividerText: {
-    color: '#666',
     marginHorizontal: 12,
   },
   emailSection: {
@@ -170,19 +188,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   input: {
-    backgroundColor: '#16213e',
-    borderRadius: 8,
-    paddingVertical: 14,
+    borderRadius: 12,
+    minHeight: 48,
     paddingHorizontal: 16,
-    color: '#fff',
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#333',
   },
   primaryBtn: {
-    backgroundColor: '#e94560',
-    paddingVertical: 14,
-    borderRadius: 8,
+    minHeight: 48,
+    borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
 });

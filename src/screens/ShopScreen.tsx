@@ -1,6 +1,8 @@
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { gql } from '@apollo/client';
 import { useQuery, useMutation } from '@apollo/client/react';
+import { useTheme } from '../theme/ThemeContext';
+import { fonts } from '../theme/fonts';
 
 const PROGRESSION_QUERY = gql`
   query Progression {
@@ -37,6 +39,7 @@ const UNLOCK_TIER = gql`
 `;
 
 export function ShopScreen() {
+  const { colors } = useTheme();
   const { data, refetch } = useQuery<any>(PROGRESSION_QUERY);
   const [buyJoker] = useMutation<any>(BUY_JOKER);
   const [unlockTier] = useMutation<any>(UNLOCK_TIER);
@@ -65,51 +68,59 @@ export function ShopScreen() {
 
   if (!prog) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.loading}>Chargement...</Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.loading, { color: colors.textMuted, fontFamily: fonts.body }]}>Chargement...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Boutique</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.text, fontFamily: fonts.heading }]}>Boutique</Text>
 
-      <View style={styles.balanceCard}>
-        <Text style={styles.balanceLabel}>Ton solde</Text>
-        <Text style={styles.balanceValue}>{prog.coins} pièces</Text>
-        <Text style={styles.jokersValue}>{prog.jokersCount} jokers</Text>
+      <View style={[styles.balanceCard, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.balanceLabel, { color: colors.textMuted, fontFamily: fonts.body }]}>Ton solde</Text>
+        <Text style={[styles.balanceValue, { color: colors.warning, fontFamily: fonts.bodyBold }]}>{prog.coins} pièces</Text>
+        <Text style={[styles.jokersValue, { color: colors.primary, fontFamily: fonts.bodySemiBold }]}>{prog.jokersCount} jokers</Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Acheter un Joker</Text>
-        <Text style={styles.sectionDesc}>Élimine un groupe de personnages en match</Text>
-        <TouchableOpacity style={styles.buyBtn} onPress={handleBuyJoker}>
-          <Text style={styles.buyBtnText}>50 pièces → 1 Joker</Text>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>Acheter un Joker</Text>
+        <Text style={[styles.sectionDesc, { color: colors.textMuted, fontFamily: fonts.body }]}>Élimine un groupe de personnages en match</Text>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={[styles.buyBtn, { backgroundColor: colors.primary, minHeight: 48 }]}
+          onPress={handleBuyJoker}
+        >
+          <Text style={[styles.buyBtnText, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>50 pièces → 1 Joker</Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Arbre de progression</Text>
-        <Text style={styles.tierInfo}>
+      <View style={[styles.section, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>Arbre de progression</Text>
+        <Text style={[styles.tierInfo, { color: colors.textMuted, fontFamily: fonts.body }]}>
           Palier {prog.currentTier} • Niveau {prog.currentLevel}/{prog.maxLevelForTier}
         </Text>
         {prog.atLevelCap && (
           <>
-            <Text style={styles.tierAlert}>Niveau max atteint pour ce palier !</Text>
-            <TouchableOpacity style={styles.unlockBtn} onPress={handleUnlockTier}>
-              <Text style={styles.unlockBtnText}>
+            <Text style={[styles.tierAlert, { color: colors.warning, fontFamily: fonts.body }]}>Niveau max atteint pour ce palier !</Text>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={[styles.unlockBtn, { backgroundColor: colors.cta, minHeight: 48 }]}
+              onPress={handleUnlockTier}
+            >
+              <Text style={[styles.unlockBtnText, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>
                 Débloquer palier {prog.currentTier + 1} ({prog.nextTierCost} pièces)
               </Text>
             </TouchableOpacity>
           </>
         )}
         {!prog.atLevelCap && (
-          <View style={styles.progressBar}>
+          <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
             <View
               style={[
                 styles.progressFill,
-                { width: `${(prog.currentLevel / prog.maxLevelForTier) * 100}%` },
+                { backgroundColor: colors.cta, width: `${(prog.currentLevel / prog.maxLevelForTier) * 100}%` },
               ]}
             />
           </View>
@@ -120,33 +131,31 @@ export function ShopScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1a1a2e', paddingTop: 60, paddingHorizontal: 24 },
-  loading: { color: '#aaa', textAlign: 'center', marginTop: 40 },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#fff', textAlign: 'center', marginBottom: 24 },
+  container: { flex: 1, paddingTop: 60, paddingHorizontal: 24 },
+  loading: { textAlign: 'center', marginTop: 40 },
+  title: { fontSize: 24, textAlign: 'center', marginBottom: 24 },
   balanceCard: {
-    backgroundColor: '#16213e',
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
     marginBottom: 24,
   },
-  balanceLabel: { color: '#aaa', fontSize: 14 },
-  balanceValue: { color: '#f39c12', fontSize: 28, fontWeight: 'bold', marginTop: 4 },
-  jokersValue: { color: '#8e44ad', fontSize: 16, marginTop: 4 },
+  balanceLabel: { fontSize: 14 },
+  balanceValue: { fontSize: 28, marginTop: 4 },
+  jokersValue: { fontSize: 16, marginTop: 4 },
   section: {
-    backgroundColor: '#16213e',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
   },
-  sectionTitle: { color: '#fff', fontSize: 16, fontWeight: '600', marginBottom: 4 },
-  sectionDesc: { color: '#aaa', fontSize: 13, marginBottom: 12 },
-  buyBtn: { backgroundColor: '#8e44ad', borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
-  buyBtnText: { color: '#fff', fontWeight: '600' },
-  tierInfo: { color: '#aaa', fontSize: 14, marginBottom: 8 },
-  tierAlert: { color: '#f39c12', fontSize: 13, marginBottom: 8 },
-  unlockBtn: { backgroundColor: '#e94560', borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
-  unlockBtnText: { color: '#fff', fontWeight: '600' },
-  progressBar: { height: 8, backgroundColor: '#333', borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: '#e94560', borderRadius: 4 },
+  sectionTitle: { fontSize: 16, marginBottom: 4 },
+  sectionDesc: { fontSize: 13, marginBottom: 12 },
+  buyBtn: { borderRadius: 8, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
+  buyBtnText: {},
+  tierInfo: { fontSize: 14, marginBottom: 8 },
+  tierAlert: { fontSize: 13, marginBottom: 8 },
+  unlockBtn: { borderRadius: 8, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
+  unlockBtnText: {},
+  progressBar: { height: 8, borderRadius: 4, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 4 },
 });

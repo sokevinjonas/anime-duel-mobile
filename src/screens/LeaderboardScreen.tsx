@@ -1,6 +1,8 @@
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
+import { useTheme } from '../theme/ThemeContext';
+import { fonts } from '../theme/fonts';
 
 const LEADERBOARD_QUERY = gql`
   query Leaderboard {
@@ -15,12 +17,13 @@ const LEADERBOARD_QUERY = gql`
 `;
 
 export function LeaderboardScreen() {
+  const { colors } = useTheme();
   const { data, loading } = useQuery<any>(LEADERBOARD_QUERY);
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.loading}>Chargement...</Text>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.loading, { color: colors.textMuted, fontFamily: fonts.body }]}>Chargement...</Text>
       </View>
     );
   }
@@ -29,26 +32,26 @@ export function LeaderboardScreen() {
   const myRank = data?.myRank;
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Classement</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.text, fontFamily: fonts.heading }]}>Classement</Text>
       {myRank && (
-        <View style={styles.myRankCard}>
-          <Text style={styles.myRankText}>Ta position : #{myRank}</Text>
+        <View style={[styles.myRankCard, { backgroundColor: colors.surface, borderColor: colors.cta }]}>
+          <Text style={[styles.myRankText, { color: colors.cta, fontFamily: fonts.bodySemiBold }]}>Ta position : #{myRank}</Text>
         </View>
       )}
       <FlatList
         data={players}
         keyExtractor={(item: any) => item.id}
         renderItem={({ item, index }: { item: any; index: number }) => (
-          <View style={styles.row}>
-            <Text style={[styles.rank, index < 3 && styles.topRank]}>
+          <View style={[styles.row, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.rank, { color: colors.textMuted, fontFamily: fonts.bodySemiBold }, index < 3 && { color: colors.warning }]}>
               #{index + 1}
             </Text>
             <View style={styles.playerInfo}>
-              <Text style={styles.username}>{item.username}</Text>
-              <Text style={styles.level}>Niv. {item.currentLevel}</Text>
+              <Text style={[styles.username, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>{item.username}</Text>
+              <Text style={[styles.level, { color: colors.textMuted, fontFamily: fonts.body }]}>Niv. {item.currentLevel}</Text>
             </View>
-            <Text style={styles.wins}>{item.totalWins} W</Text>
+            <Text style={[styles.wins, { color: colors.success, fontFamily: fonts.bodyBold }]}>{item.totalWins} W</Text>
           </View>
         )}
       />
@@ -57,31 +60,27 @@ export function LeaderboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#1a1a2e', paddingTop: 60 },
-  loading: { color: '#aaa', textAlign: 'center', marginTop: 40 },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#fff', textAlign: 'center', marginBottom: 16 },
+  container: { flex: 1, paddingTop: 60 },
+  loading: { textAlign: 'center', marginTop: 40 },
+  title: { fontSize: 24, textAlign: 'center', marginBottom: 16 },
   myRankCard: {
-    backgroundColor: '#16213e',
     borderRadius: 8,
     padding: 12,
     marginHorizontal: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#e94560',
   },
-  myRankText: { color: '#e94560', fontWeight: '600', textAlign: 'center', fontSize: 16 },
+  myRankText: { textAlign: 'center', fontSize: 16 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#222',
   },
-  rank: { width: 40, color: '#aaa', fontSize: 14, fontWeight: '600' },
-  topRank: { color: '#f39c12' },
+  rank: { width: 40, fontSize: 14 },
   playerInfo: { flex: 1 },
-  username: { color: '#fff', fontSize: 15, fontWeight: '600' },
-  level: { color: '#aaa', fontSize: 12 },
-  wins: { color: '#2ecc71', fontSize: 15, fontWeight: 'bold' },
+  username: { fontSize: 15 },
+  level: { fontSize: 12 },
+  wins: { fontSize: 15 },
 });

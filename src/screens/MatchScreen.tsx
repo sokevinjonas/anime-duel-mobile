@@ -8,12 +8,15 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { CharacterPicker } from '../components/CharacterPicker';
 import { getSocket, connectSocket } from '../services/socket';
 import { getAccessToken } from '../services/auth';
+import { useTheme } from '../theme/ThemeContext';
+import { fonts } from '../theme/fonts';
 
 type MatchRoute = RouteProp<RootStackParamList, 'Match'>;
 type Nav = NativeStackNavigationProp<RootStackParamList, 'Match'>;
@@ -30,6 +33,7 @@ interface QuestionEntry {
 export function MatchScreen() {
   const route = useRoute<MatchRoute>();
   const navigation = useNavigation<Nav>();
+  const { colors } = useTheme();
   const { roomCode: joinCode } = route.params || {};
 
   const [phase, setPhase] = useState<GamePhase>('connecting');
@@ -161,18 +165,18 @@ export function MatchScreen() {
 
   if (phase === 'connecting') {
     return (
-      <View style={styles.center}>
-        <Text style={styles.statusText}>Connexion...</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={[styles.statusText, { color: colors.text, fontFamily: fonts.body }]}>Connexion...</Text>
       </View>
     );
   }
 
   if (phase === 'waiting') {
     return (
-      <View style={styles.center}>
-        <Text style={styles.statusText}>En attente d'un adversaire</Text>
-        <Text style={styles.codeDisplay}>{myRoomCode}</Text>
-        <Text style={styles.hint}>Partage ce code à ton ami</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={[styles.statusText, { color: colors.text, fontFamily: fonts.body }]}>En attente d'un adversaire</Text>
+        <Text style={[styles.codeDisplay, { color: colors.cta, fontFamily: fonts.heading }]}>{myRoomCode}</Text>
+        <Text style={[styles.hint, { color: colors.textSecondary, fontFamily: fonts.body }]}>Partage ce code a ton ami</Text>
       </View>
     );
   }

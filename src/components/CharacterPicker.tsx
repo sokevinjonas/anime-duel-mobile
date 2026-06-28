@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
+import { useTheme } from '../theme/ThemeContext';
+import { fonts } from '../theme/fonts';
 
 const CHARACTERS_QUERY = gql`
   query Characters($search: String) {
@@ -30,6 +32,7 @@ interface CharacterPickerProps {
 }
 
 export function CharacterPicker({ visible, onSelect, onClose }: CharacterPickerProps) {
+  const { colors } = useTheme();
   const [search, setSearch] = useState('');
   const { data } = useQuery<any>(CHARACTERS_QUERY, {
     variables: { search: search || undefined },
@@ -40,17 +43,17 @@ export function CharacterPicker({ visible, onSelect, onClose }: CharacterPickerP
 
   return (
     <Modal visible={visible} animationType="slide">
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.header}>
-          <Text style={styles.title}>Choisis ton personnage</Text>
-          <TouchableOpacity onPress={onClose}>
-            <Text style={styles.closeBtn}>Fermer</Text>
+          <Text style={[styles.title, { color: colors.text, fontFamily: fonts.heading }]}>CHOISIS TON PERSO</Text>
+          <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
+            <Text style={[styles.closeBtn, { color: colors.cta, fontFamily: fonts.bodySemiBold }]}>Fermer</Text>
           </TouchableOpacity>
         </View>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, fontFamily: fonts.body }]}
           placeholder="Rechercher..."
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.textMuted}
           value={search}
           onChangeText={setSearch}
           autoFocus
@@ -60,11 +63,12 @@ export function CharacterPicker({ visible, onSelect, onClose }: CharacterPickerP
           keyExtractor={(item: any) => item.id}
           renderItem={({ item }: { item: any }) => (
             <TouchableOpacity
-              style={styles.item}
+              style={[styles.item, { borderBottomColor: colors.border }]}
               onPress={() => onSelect({ id: item.id, name: item.name })}
+              activeOpacity={0.7}
             >
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemAnime}>{item.anime.title}</Text>
+              <Text style={[styles.itemName, { color: colors.text, fontFamily: fonts.bodySemiBold }]}>{item.name}</Text>
+              <Text style={[styles.itemAnime, { color: colors.cta, fontFamily: fonts.body }]}>{item.anime.title}</Text>
             </TouchableOpacity>
           )}
         />
@@ -74,11 +78,7 @@ export function CharacterPicker({ visible, onSelect, onClose }: CharacterPickerP
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1a1a2e',
-    paddingTop: 60,
-  },
+  container: { flex: 1, paddingTop: 60 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -86,26 +86,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 16,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  closeBtn: {
-    color: '#e94560',
-    fontSize: 16,
-  },
+  title: { fontSize: 18 },
+  closeBtn: { fontSize: 15 },
   searchInput: {
-    backgroundColor: '#16213e',
-    borderRadius: 8,
-    paddingVertical: 12,
+    borderRadius: 12,
+    minHeight: 48,
     paddingHorizontal: 16,
-    color: '#fff',
     fontSize: 16,
     marginHorizontal: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#333',
   },
   item: {
     flexDirection: 'row',
@@ -114,14 +104,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#222',
+    minHeight: 48,
   },
-  itemName: {
-    fontSize: 16,
-    color: '#fff',
-  },
-  itemAnime: {
-    fontSize: 14,
-    color: '#e94560',
-  },
+  itemName: { fontSize: 15 },
+  itemAnime: { fontSize: 13 },
 });
