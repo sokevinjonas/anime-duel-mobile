@@ -50,10 +50,10 @@ export function useAuth() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const [oauthLoginMutation] = useMutation(OAUTH_LOGIN);
-  const [sendCodeMutation] = useMutation(SEND_CODE);
-  const [verifyCodeMutation] = useMutation(VERIFY_CODE);
-  const [fetchMe] = useLazyQuery(ME_QUERY);
+  const [oauthLoginMutation] = useMutation<any>(OAUTH_LOGIN);
+  const [sendCodeMutation] = useMutation<any>(SEND_CODE);
+  const [verifyCodeMutation] = useMutation<any>(VERIFY_CODE);
+  const [fetchMe] = useLazyQuery<any>(ME_QUERY);
 
   const loadUser = useCallback(async () => {
     const token = await getAccessToken();

@@ -27,7 +27,7 @@ const ME_QUERY = gql`
 export function ProfileScreen() {
   const navigation = useNavigation<Nav>();
   const { logout } = useAuth();
-  const { data, loading } = useQuery(ME_QUERY);
+  const { data, loading } = useQuery<any>(ME_QUERY);
 
   const handleLogout = async () => {
     await logout();
