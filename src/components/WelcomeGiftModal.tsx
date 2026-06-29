@@ -152,25 +152,31 @@ export function WelcomeGiftModal({ visible, onClose }: WelcomeGiftModalProps) {
 
                   <View style={styles.rewardsGrid}>
                     <View style={[styles.rewardCard, { backgroundColor: colors.surface }]}>
-                      <View style={[styles.rewardGradient, { backgroundColor: colors.warning + '20' }]}>
+                      <LinearGradient
+                        colors={[colors.warning + '20', colors.warning + '05']}
+                        style={styles.rewardGradient}
+                      >
+                        <View style={[styles.rewardIconBox, { backgroundColor: colors.warning + '30' }]}>
+                          <Text style={styles.rewardEmoji}>10</Text>
+                        </View>
                         <Text style={[styles.rewardValue, { color: colors.warning, fontFamily: fonts.heading }]}>
-                          10
-                        </Text>
-                        <Text style={[styles.rewardLabel, { color: colors.warning, fontFamily: fonts.body }]}>
                           Pièces
                         </Text>
-                      </View>
+                      </LinearGradient>
                     </View>
 
                     <View style={[styles.rewardCard, { backgroundColor: colors.surface }]}>
-                      <View style={[styles.rewardGradient, { backgroundColor: colors.primary + '20' }]}>
+                      <LinearGradient
+                        colors={[colors.primary + '20', colors.primary + '05']}
+                        style={styles.rewardGradient}
+                      >
+                        <View style={[styles.rewardIconBox, { backgroundColor: colors.primary + '30' }]}>
+                          <Text style={styles.rewardEmoji}>3</Text>
+                        </View>
                         <Text style={[styles.rewardValue, { color: colors.primary, fontFamily: fonts.heading }]}>
-                          3
-                        </Text>
-                        <Text style={[styles.rewardLabel, { color: colors.primary, fontFamily: fonts.body }]}>
                           Jokers
                         </Text>
-                      </View>
+                      </LinearGradient>
                     </View>
                   </View>
 
@@ -292,18 +298,25 @@ const styles = StyleSheet.create({
   },
   rewardGradient: {
     alignItems: 'center',
-    paddingVertical: 28,
+    paddingVertical: 20,
     paddingHorizontal: 12,
+  },
+  rewardIconBox: {
+    width: 50,
+    height: 50,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   rewardValue: {
     fontSize: 28,
-    marginBottom: 8,
+    marginBottom: 4,
     fontWeight: 'bold',
   },
   rewardLabel: {
-    fontSize: 18,
+    fontSize: 12,
     textAlign: 'center',
-    fontWeight: 'bold',
   },
   infoBox: {
     borderRadius: 10,
