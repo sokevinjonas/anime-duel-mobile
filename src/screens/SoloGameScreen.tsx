@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
@@ -43,22 +43,37 @@ const SUBMIT_GUESS = gql`
   }
 `;
 
+const USE_JOKER = gql`
+  mutation SoloUseJoker($sessionId: String!) {
+    soloUseJoker(sessionId: $sessionId) {
+      hint
+      jokersRemaining
+    }
+  }
+`;
+
 export function SoloGameScreen() {
   const navigation = useNavigation<Nav>();
   const { colors, isDark } = useTheme();
 
+  const scrollViewRef = useRef<ScrollView>(null);
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [maxQuestions, setMaxQuestions] = useState(10);
-  const [questions, setQuestions] = useState<Array<{ question: string; answer: string }>>([]);
+  const [messages, setMessages] = useState<Array<{ type: 'player' | 'ai'; text: string }>>([]);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [guess, setGuess] = useState('');
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState('');
+  const [jokersRemaining, setJokersRemaining] = useState(3);
+  const [aiAvatarUrl, setAiAvatarUrl] = useState<string>('');
 
   const [startGame, { loading: starting, error: startError }] = useMutation(START_SOLO_GAME);
   const [askQuestion, { loading: asking, error: askError }] = useMutation(ASK_QUESTION);
   const [submitGuess, { loading: guessing, error: guessError }] = useMutation(SUBMIT_GUESS);
+  const [useJoker, { loading: jokerLoading }] = useMutation(USE_JOKER);
 
   // Auto logout si erreur auth
   useAuthErrorHandler(startError);
@@ -69,13 +84,26 @@ export function SoloGameScreen() {
     handleStartGame();
   }, []);
 
+  useEffect(() => {
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
+
+  const translateAnswer = (answer: string): string => {
+    const translations: Record<string, string> = {
+      'YES': 'Oui',
+      'NO': 'Non',
+      'PARTIALLY': 'Peut-être',
+    };
+    return translations[answer] || answer;
+  };
+
   const handleStartGame = async () => {
     try {
       const { data } = await startGame({ variables: { difficulty: 'EASY' } });
       setSessionId(data.startSoloPlayerGuesses.sessionId);
       setMaxQuestions(data.startSoloPlayerGuesses.maxQuestions);
       if (data.startSoloPlayerGuesses.firstQuestion) {
-        setQuestions([{ question: data.startSoloPlayerGuesses.firstQuestion, answer: 'AI started' }]);
+        setMessages([{ type: 'ai', text: data.startSoloPlayerGuesses.firstQuestion }]);
       }
     } catch (error: any) {
       console.error('Error starting game:', error);
@@ -90,19 +118,46 @@ export function SoloGameScreen() {
   const handleAskQuestion = async () => {
     if (!currentQuestion.trim() || !sessionId) return;
 
+    const question = currentQuestion;
     try {
+      // Add player message
+      setMessages(prev => [...prev, { type: 'player', text: question }]);
+      setCurrentQuestion('');
+
       const { data } = await askQuestion({
-        variables: { sessionId, question: currentQuestion },
+        variables: { sessionId, question },
       });
 
-      setQuestions([...questions, { question: currentQuestion, answer: data.soloAskQuestion.answer }]);
-      setCurrentQuestion('');
+      // Add AI response
+      const translatedAnswer = translateAnswer(data.soloAskQuestion.answer);
+      setMessages(prev => [...prev, { type: 'ai', text: translatedAnswer }]);
 
       if (data.soloAskQuestion.quotaReached) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       }
     } catch (error) {
       console.error('Error asking question:', error);
+    }
+  };
+
+  const handleUseJoker = async () => {
+    if (!sessionId || jokersRemaining <= 0) return;
+
+    try {
+      Animated.sequence([
+        Animated.timing(scaleAnim, { toValue: 1.2, duration: 100, useNativeDriver: true }),
+        Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
+      ]).start();
+
+      const { data } = await useJoker({ variables: { sessionId } });
+
+      if (data?.soloUseJoker?.hint) {
+        setMessages(prev => [...prev, { type: 'ai', text: `💡 Indice: ${data.soloUseJoker.hint}` }]);
+        setJokersRemaining(data.soloUseJoker.jokersRemaining);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (error) {
+      console.error('Error using joker:', error);
     }
   };
 
@@ -180,24 +235,60 @@ export function SoloGameScreen() {
         <Text style={[styles.headerTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
           Mode Solo
         </Text>
-        <Text style={[styles.questionsCount, { color: colors.primary, fontFamily: fonts.bodyBold }]}>
-          {questions.length}/{maxQuestions}
-        </Text>
+        <View style={styles.headerRight}>
+          <Text style={[styles.questionsCount, { color: colors.primary, fontFamily: fonts.bodyBold }]}>
+            {messages.length}/{maxQuestions}
+          </Text>
+          <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+            <TouchableOpacity
+              style={[styles.jokerBtn, { backgroundColor: jokersRemaining > 0 ? colors.orange : colors.border }]}
+              onPress={handleUseJoker}
+              disabled={jokersRemaining <= 0 || jokerLoading}
+            >
+              <Text style={styles.jokerText}>🃏 {jokersRemaining}</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
       </View>
 
-      {/* Questions history */}
-      <ScrollView style={styles.historyScroll} contentContainerStyle={styles.historyContent}>
-        {questions.map((q, idx) => (
+      {/* Chat messages */}
+      <ScrollView ref={scrollViewRef} style={styles.historyScroll} contentContainerStyle={styles.historyContent}>
+        {messages.map((msg, idx) => (
           <View
             key={idx}
-            style={[styles.questionCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            style={[
+              styles.messageRow,
+              { justifyContent: msg.type === 'player' ? 'flex-end' : 'flex-start' },
+            ]}
           >
-            <Text style={[styles.questionText, { color: colors.text, fontFamily: fonts.body }]}>
-              Q: {q.question}
-            </Text>
-            <Text style={[styles.answerText, { color: colors.primary, fontFamily: fonts.bodyBold }]}>
-              R: {q.answer}
-            </Text>
+            {msg.type === 'ai' && aiAvatarUrl && (
+              <Image
+                source={{ uri: aiAvatarUrl }}
+                style={styles.avatar}
+              />
+            )}
+            <View
+              style={[
+                styles.messageBubble,
+                {
+                  backgroundColor: msg.type === 'player' ? colors.primary : colors.surface,
+                  borderWidth: msg.type === 'ai' ? 1 : 0,
+                  borderColor: msg.type === 'ai' ? colors.border : 'transparent',
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.messageText,
+                  {
+                    color: msg.type === 'player' ? '#FFF' : colors.text,
+                    fontFamily: fonts.body,
+                  },
+                ]}
+              >
+                {msg.text}
+              </Text>
+            </View>
           </View>
         ))}
       </ScrollView>
@@ -256,59 +347,77 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
   },
-  headerTitle: { fontSize: 18 },
+  headerTitle: { fontSize: 18, flex: 1, marginLeft: 12 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   questionsCount: { fontSize: 16 },
-  historyScroll: { flex: 1 },
-  historyContent: { padding: 16, gap: 12 },
-  questionCard: {
-    padding: 16,
-    borderRadius: 12,
+  jokerBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
     borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  jokerText: { fontSize: 16, fontWeight: 'bold' },
+  historyScroll: { flex: 1 },
+  historyContent: { padding: 12, gap: 12 },
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
     gap: 8,
   },
-  questionText: { fontSize: 15, lineHeight: 22 },
-  answerText: { fontSize: 14 },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  messageBubble: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 16,
+    maxWidth: '78%',
+  },
+  messageText: { fontSize: 14, lineHeight: 20 },
   inputArea: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 12,
+    padding: 12,
+    gap: 10,
     borderTopWidth: 1,
     alignItems: 'flex-end',
   },
   input: {
     flex: 1,
-    minHeight: 44,
+    minHeight: 40,
     maxHeight: 100,
-    borderRadius: 12,
+    borderRadius: 20,
     borderWidth: 1,
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 15,
+    paddingVertical: 10,
+    fontSize: 14,
   },
   sendBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
   guessArea: {
-    padding: 16,
-    gap: 12,
+    padding: 12,
+    gap: 10,
   },
-  guessLabel: { fontSize: 14 },
-  guessRow: { flexDirection: 'row', gap: 12, alignItems: 'center' },
+  guessLabel: { fontSize: 13, fontWeight: '600' },
+  guessRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   guessInput: {
     flex: 1,
-    height: 48,
+    height: 44,
     borderRadius: 12,
     borderWidth: 1,
-    paddingHorizontal: 16,
-    fontSize: 15,
+    paddingHorizontal: 14,
+    fontSize: 14,
   },
   resultContainer: {
     flex: 1,
