@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { getAccessToken } from '../services/auth';
+import { getSocketUrl } from '../config/api';
 
 interface EnergyStatus {
   current: number;
@@ -23,8 +24,8 @@ export function useEnergySocket() {
         const token = await getAccessToken();
         if (!token || !isMounted) return;
 
-        const apiUrl = process.env.EXPO_PUBLIC_API_URL;
-        const newSocket = io(`${apiUrl}/energy`, {
+        const socketUrl = getSocketUrl();
+        const newSocket = io(`${socketUrl}/energy`, {
           auth: { token },
           reconnection: true,
           reconnectionDelay: 1000,

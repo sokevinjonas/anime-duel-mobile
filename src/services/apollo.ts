@@ -2,8 +2,8 @@ import { ApolloClient, InMemoryCache, ApolloLink, Observable, from } from '@apol
 import { HttpLink } from '@apollo/client/link/http';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
-import { Platform } from 'react-native';
 import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from './auth';
+import { getApiUrl } from '../config/api';
 
 declare module '@apollo/client' {
   namespace ApolloClient {
@@ -20,12 +20,6 @@ declare module '@apollo/client' {
     }
   }
 }
-
-const getApiUrl = () => {
-  if (Platform.OS === 'web') return process.env.EXPO_PUBLIC_API_URL_WEB;
-  if (Platform.OS === 'android') return process.env.EXPO_PUBLIC_API_URL_ANDROID;
-  return process.env.EXPO_PUBLIC_API_URL_IOS;
-};
 
 const httpLink = new HttpLink({
   uri: getApiUrl(),
