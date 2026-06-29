@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, ActivityIndicator, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { gql } from '@apollo/client';
@@ -13,6 +13,7 @@ import { fonts } from '../theme/fonts';
 import { Button3D } from '../components/ui/Button3D';
 import { ProgressionMap } from '../components/progression/ProgressionMap';
 import { EnergyBar } from '../components/ui/EnergyBar';
+import { EnergyModal } from '../components/EnergyModal';
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
 import { WelcomeGiftModal } from '../components/WelcomeGiftModal';
 
@@ -33,18 +34,6 @@ const ME_QUERY = gql`
   }
 `;
 
-const ENERGY_STATUS = gql`
-  query EnergyStatus {
-    energyStatus {
-      current
-      max
-      timeToNextMs
-      regenTimePerHeartMs
-      refillCostGems
-    }
-  }
-`;
-
 const MARK_GIFT_VIEWED = gql`
   mutation MarkWelcomeGiftAsViewed {
     markWelcomeGiftAsViewed
@@ -55,9 +44,10 @@ export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { data, loading, error } = useQuery<any>(ME_QUERY);
+  const { data, loading, error, refetch } = useQuery<any>(ME_QUERY);
   const [markGiftViewed] = useMutation<any>(MARK_GIFT_VIEWED);
   const [showGiftModal, setShowGiftModal] = useState(false);
+  const [showEnergyModal, setShowEnergyModal] = useState(false);
 
   // Check for new user gift on mount
   useEffect(() => {
@@ -66,11 +56,19 @@ export function HomeScreen() {
     }
   }, [data?.me?.welcomeGiftSeen, loading]);
 
+  // Refetch data when screen is focused (after returning from SoloGame)
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
+
   // Auto logout si erreur auth
   useAuthErrorHandler(error);
 
   const currentLevel = data?.me?.currentLevel || 1;
   const currentTier = data?.me?.currentTier || 0;
+  const currentEnergy = data?.me?.energy || 0;
 
   // Calculer maxLevel selon le palier actuel
   // Palier 0 = 15 niveaux, Palier 1+ = 25 niveaux chacun
@@ -82,8 +80,24 @@ export function HomeScreen() {
   const maxLevel = getMaxLevel(currentTier + 1); // Afficher jusqu'au palier suivant
 
   const handlePlay = () => {
+    if (currentEnergy <= 0) {
+      Alert.alert(
+        '⚡ Pas d\'énergie',
+        'Tu n\'as plus d\'énergie. Attends la régénération ou utilise des gems.',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          { text: 'Voir l\'énergie', onPress: () => setShowEnergyModal(true) },
+        ],
+      );
+      return;
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     navigation.navigate('SoloGame');
+  };
+
+  const handleEnergyModalClose = async () => {
+    setShowEnergyModal(false);
+    await refetch();
   };
 
   if (loading) {
@@ -117,6 +131,7 @@ export function HomeScreen() {
             current={data?.me?.energy || 0}
             max={data?.me?.maxEnergy || 5}
             coins={data?.me?.coins}
+            onEnergyPress={() => setShowEnergyModal(true)}
           />
 
           <View style={styles.headerActions}>
@@ -138,7 +153,12 @@ export function HomeScreen() {
 
         {/* Progression Map - fills remaining space */}
         <View style={styles.mapContainer}>
-          <ProgressionMap currentLevel={currentLevel} maxLevel={maxLevel} onPlayLevel={handlePlay} />
+          <ProgressionMap
+            currentLevel={currentLevel}
+            maxLevel={maxLevel}
+            onPlayLevel={handlePlay}
+            energyAvailable={currentEnergy > 0}
+          />
         </View>
 
         {/* Floating Play Button - positioned above tab bar */}
@@ -167,6 +187,12 @@ export function HomeScreen() {
           await markGiftViewed();
           setShowGiftModal(false);
         }}
+      />
+
+      <EnergyModal
+        visible={showEnergyModal}
+        onClose={handleEnergyModalClose}
+        currentGems={data?.me?.gems || 0}
       />
     </>
   );

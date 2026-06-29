@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
 import { fonts } from '../../theme/fonts';
@@ -8,20 +8,25 @@ interface EnergyBarProps {
   max: number;
   coins?: number;
   gems?: number;
+  onEnergyPress?: () => void;
 }
 
-export function EnergyBar({ current, max, coins, gems }: EnergyBarProps) {
+export function EnergyBar({ current, max, coins, gems, onEnergyPress }: EnergyBarProps) {
   const { colors } = useTheme();
 
   return (
     <View style={styles.container}>
       {/* Energy */}
-      <View style={[styles.item, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
+      <TouchableOpacity
+        style={[styles.item, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}
+        onPress={onEnergyPress}
+        activeOpacity={0.7}
+      >
         <MaterialIcons name="favorite" size={18} color="#FF6B6B" />
         <Text style={[styles.value, { color: colors.text, fontFamily: fonts.bodyBold }]}>
           {current}/{max}
         </Text>
-      </View>
+      </TouchableOpacity>
 
       {/* Coins */}
       {coins !== undefined && (

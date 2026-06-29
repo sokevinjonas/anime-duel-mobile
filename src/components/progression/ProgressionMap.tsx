@@ -13,9 +13,10 @@ interface ProgressionMapProps {
   currentLevel: number;
   maxLevel: number;
   onPlayLevel?: () => void;
+  energyAvailable?: boolean;
 }
 
-export function ProgressionMap({ currentLevel, maxLevel, onPlayLevel }: ProgressionMapProps) {
+export function ProgressionMap({ currentLevel, maxLevel, onPlayLevel, energyAvailable = true }: ProgressionMapProps) {
   const { colors, isDark } = useTheme();
   const scrollRef = useRef<ScrollView>(null);
 
@@ -172,7 +173,8 @@ export function ProgressionMap({ currentLevel, maxLevel, onPlayLevel }: Progress
               status={getStatus(level)}
               isMilestone={isMilestone(level)}
               milestoneStars={getMilestoneStars(level)}
-              onPress={getStatus(level) === 'current' ? onPlayLevel : undefined}
+              onPress={getStatus(level) === 'current' && energyAvailable ? onPlayLevel : undefined}
+              disabled={getStatus(level) === 'current' && !energyAvailable}
             />
           </View>
         );

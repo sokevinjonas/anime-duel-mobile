@@ -2,9 +2,9 @@ import { io, Socket } from 'socket.io-client';
 import { Platform } from 'react-native';
 
 const getSocketUrl = () => {
-  if (Platform.OS === 'web') return process.env.EXPO_PUBLIC_SOCKET_URL_WEB || 'http://localhost:3001';
-  if (Platform.OS === 'android') return process.env.EXPO_PUBLIC_SOCKET_URL_ANDROID || 'http://10.0.2.2:3001';
-  return process.env.EXPO_PUBLIC_SOCKET_URL_IOS || 'http://localhost:3001';
+  if (Platform.OS === 'web') return process.env.EXPO_PUBLIC_SOCKET_URL_WEB;
+  if (Platform.OS === 'android') return process.env.EXPO_PUBLIC_SOCKET_URL_ANDROID;
+  return process.env.EXPO_PUBLIC_SOCKET_URL_IOS;
 };
 
 let socket: Socket | null = null;

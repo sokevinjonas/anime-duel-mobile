@@ -13,22 +13,23 @@ interface LevelNodeProps {
   isMilestone?: boolean;
   milestoneStars?: number;
   onPress?: () => void;
+  disabled?: boolean;
 }
 
-export function LevelNode({ level, status, isMilestone = false, milestoneStars = 1, onPress }: LevelNodeProps) {
+export function LevelNode({ level, status, isMilestone = false, milestoneStars = 1, onPress, disabled = false }: LevelNodeProps) {
   const { colors } = useTheme();
 
   const nodeSize = isMilestone ? 56 : 44;
   const bgColor =
     status === 'completed' ? colors.primary :
-    status === 'current' ? colors.orange :
+    status === 'current' ? (disabled ? colors.border : colors.orange) :
     colors.border;
   const borderColor =
     status === 'completed' ? colors.primaryDark :
-    status === 'current' ? colors.orangeDark :
+    status === 'current' ? (disabled ? colors.borderDark : colors.orangeDark) :
     colors.borderDark;
 
-  const isClickable = status === 'current';
+  const isClickable = status === 'current' && !disabled;
 
   const handlePress = () => {
     if (!isClickable || !onPress) return;
@@ -57,7 +58,7 @@ export function LevelNode({ level, status, isMilestone = false, milestoneStars =
             <MaterialIcons name="check" size={24} color="#FFF" />
           )}
           {status === 'current' && (
-            <MaterialIcons name="play-arrow" size={20} color="#FFF" />
+            <MaterialIcons name={disabled ? 'battery-alert' : 'play-arrow'} size={20} color={disabled ? colors.error : '#FFF'} />
           )}
           {status === 'locked' && (
             <MaterialIcons name="lock" size={20} color={colors.textMuted} />

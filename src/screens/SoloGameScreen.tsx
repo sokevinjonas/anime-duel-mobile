@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -184,6 +184,10 @@ export function SoloGameScreen() {
     }
   };
 
+  const handleGoBack = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
   if (starting) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -217,7 +221,7 @@ export function SoloGameScreen() {
             title="RETOUR"
             color={colors.primary}
             darkColor={colors.primaryDark}
-            onPress={() => navigation.goBack()}
+            onPress={handleGoBack}
             size="large"
           />
         </View>
@@ -229,7 +233,7 @@ export function SoloGameScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
       <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={handleGoBack}>
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
