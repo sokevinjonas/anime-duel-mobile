@@ -15,6 +15,7 @@ import { ProgressionMap } from '../components/progression/ProgressionMap';
 import { EnergyBar } from '../components/ui/EnergyBar';
 import { EnergyModal } from '../components/EnergyModal';
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
+import { useRefetchUser } from '../hooks/useRefetchUser';
 import { WelcomeGiftModal } from '../components/WelcomeGiftModal';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -56,12 +57,8 @@ export function HomeScreen() {
     }
   }, [data?.me?.welcomeGiftSeen, loading]);
 
-  // Refetch data when screen is focused (after returning from SoloGame)
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, [refetch]),
-  );
+  // Refetch user data when screen is focused
+  useRefetchUser(refetch);
 
   // Auto logout si erreur auth
   useAuthErrorHandler(error);
@@ -80,17 +77,19 @@ export function HomeScreen() {
   const maxLevel = getMaxLevel(currentTier + 1); // Afficher jusqu'au palier suivant
 
   const handlePlay = () => {
+    // Toujours afficher le modal d'énergie au clic sur JOUER
+    setShowEnergyModal(true);
+  };
+
+  const handlePlayConfirmed = () => {
     if (currentEnergy <= 0) {
       Alert.alert(
         '⚡ Pas d\'énergie',
         'Tu n\'as plus d\'énergie. Attends la régénération ou utilise des gems.',
-        [
-          { text: 'Annuler', style: 'cancel' },
-          { text: 'Voir l\'énergie', onPress: () => setShowEnergyModal(true) },
-        ],
       );
       return;
     }
+    setShowEnergyModal(false);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     navigation.navigate('SoloGame');
   };
@@ -193,6 +192,7 @@ export function HomeScreen() {
         visible={showEnergyModal}
         onClose={handleEnergyModalClose}
         currentGems={data?.me?.gems || 0}
+        onPlay={handlePlayConfirmed}
       />
     </>
   );

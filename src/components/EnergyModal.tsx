@@ -23,12 +23,14 @@ interface EnergyModalProps {
   visible: boolean;
   onClose: () => void;
   currentGems: number;
+  onPlay?: () => void;
 }
 
 export function EnergyModal({
   visible,
   onClose,
   currentGems,
+  onPlay,
 }: EnergyModalProps) {
   const { colors, isDark } = useTheme();
   const { energyStatus, isConnected } = useEnergySocket();
@@ -182,12 +184,23 @@ export function EnergyModal({
             />
           </View>
 
-          {/* Close Button */}
-          <TouchableOpacity style={[styles.closeBtn, { backgroundColor: colors.border }]} onPress={onClose}>
-            <Text style={[styles.closeBtnText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
-              Fermer
-            </Text>
-          </TouchableOpacity>
+          {/* Action Buttons */}
+          <View style={styles.actionButtons}>
+            {onPlay && energyStatus && energyStatus.current > 0 && (
+              <Button3D
+                title="JOUER"
+                color={colors.primary}
+                darkColor={colors.primaryDark}
+                onPress={onPlay}
+                size="large"
+              />
+            )}
+            <TouchableOpacity style={[styles.closeBtn, { backgroundColor: colors.border }]} onPress={onClose}>
+              <Text style={[styles.closeBtnText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                Fermer
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
@@ -297,6 +310,9 @@ const styles = StyleSheet.create({
   gemsAvailable: {
     fontSize: 12,
     marginLeft: 4,
+  },
+  actionButtons: {
+    gap: 12,
   },
   closeBtn: {
     height: 44,
