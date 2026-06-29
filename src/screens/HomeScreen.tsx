@@ -11,6 +11,8 @@ import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
 import { Button3D } from '../components/ui/Button3D';
 import { ProgressionMap } from '../components/progression/ProgressionMap';
+import { EnergyBar } from '../components/ui/EnergyBar';
+import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -20,6 +22,22 @@ const ME_QUERY = gql`
       id
       currentLevel
       currentTier
+      coins
+      gems
+      energy
+      maxEnergy
+    }
+  }
+`;
+
+const ENERGY_STATUS = gql`
+  query EnergyStatus {
+    energyStatus {
+      current
+      max
+      timeToNextMs
+      regenTimePerHeartMs
+      refillCostGems
     }
   }
 `;
@@ -28,7 +46,10 @@ export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const { data, loading } = useQuery<any>(ME_QUERY);
+  const { data, loading, error } = useQuery<any>(ME_QUERY);
+
+  // Auto logout si erreur auth
+  useAuthErrorHandler(error);
 
   const currentLevel = data?.me?.currentLevel || 1;
   const currentTier = data?.me?.currentTier || 0;
@@ -44,8 +65,7 @@ export function HomeScreen() {
 
   const handlePlay = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-    // TODO: call backend mutation startSoloPlayerGuesses with level-based difficulty
-    console.log(`Starting match at level ${currentLevel}`);
+    navigation.navigate('SoloGame');
   };
 
   if (loading) {
@@ -72,6 +92,14 @@ export function HomeScreen() {
         <Text style={[styles.logo, { color: colors.primary, fontFamily: fonts.bodyBlack }]}>
           ANIME DUEL
         </Text>
+
+        {/* Energy and Currency Bar */}
+        <EnergyBar
+          current={data?.me?.energy || 0}
+          max={data?.me?.maxEnergy || 5}
+          coins={data?.me?.coins}
+        />
+
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={[
@@ -84,33 +112,7 @@ export function HomeScreen() {
             onPress={() => navigation.navigate('Missions')}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="assignment" size={22} color={colors.cta} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.headerBtn,
-              {
-                backgroundColor: colors.surfaceElevated,
-                borderColor: colors.border,
-              },
-            ]}
-            onPress={() => navigation.navigate('Shop')}
-            activeOpacity={0.7}
-          >
-            <MaterialIcons name="store" size={22} color={colors.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.headerBtn,
-              {
-                backgroundColor: colors.surfaceElevated,
-                borderColor: colors.border,
-              },
-            ]}
-            onPress={() => navigation.navigate('Catalog')}
-            activeOpacity={0.7}
-          >
-            <MaterialIcons name="collections" size={22} color={colors.orange} />
+            <MaterialIcons name="flag" size={22} color={colors.cta} />
           </TouchableOpacity>
         </View>
       </View>

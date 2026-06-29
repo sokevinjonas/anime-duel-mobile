@@ -8,6 +8,7 @@ import { LoginScreen } from '../screens/LoginScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { CatalogScreen } from '../screens/CatalogScreen';
 import { MatchScreen } from '../screens/MatchScreen';
+import { SoloGameScreen } from '../screens/SoloGameScreen';
 import { SocialScreen } from '../screens/SocialScreen';
 import { ShopScreen } from '../screens/ShopScreen';
 import { MissionsScreen } from '../screens/MissionsScreen';
@@ -22,6 +23,7 @@ export type RootStackParamList = {
   Login: undefined;
   MainTabs: undefined;
   Match: { matchId?: string; roomCode?: string };
+  SoloGame: undefined;
   Catalog: undefined;
   Shop: undefined;
   Missions: undefined;
@@ -101,6 +103,11 @@ export function AppNavigator() {
           name="Match"
           component={MatchScreen}
           options={{ title: 'Match' }}
+        />
+        <Stack.Screen
+          name="SoloGame"
+          component={SoloGameScreen}
+          options={{ title: 'Match Solo', headerShown: false }}
         />
         <Stack.Screen
           name="Catalog"

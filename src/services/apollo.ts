@@ -5,6 +5,20 @@ import { onError } from '@apollo/client/link/error';
 import { Platform } from 'react-native';
 import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from './auth';
 
+declare module '@apollo/client' {
+  interface DeclareDefaultOptions {
+    watchQuery: {
+      errorPolicy: 'all';
+    };
+    query: {
+      errorPolicy: 'all';
+    };
+    mutate: {
+      errorPolicy: 'all';
+    };
+  }
+}
+
 const getApiUrl = () => {
   if (Platform.OS === 'web') return process.env.EXPO_PUBLIC_API_URL_WEB;
   if (Platform.OS === 'android') return process.env.EXPO_PUBLIC_API_URL_ANDROID;
@@ -26,24 +40,39 @@ const authLink = setContext(async (_, { headers }) => {
   };
 });
 
-// Refresh token automatique quand le token expire
+// Gestion des erreurs d'authentification
 // @ts-ignore - onError is deprecated but new API has type issues
 const errorLink = onError(({ graphQLErrors, operation, forward }) => {
   if (graphQLErrors) {
     for (const err of graphQLErrors) {
-      if (err.extensions?.code === 'UNAUTHENTICATED') {
-        // Token expiré, tenter de refresh
+      const isAuthError =
+        err.extensions?.code === 'UNAUTHENTICATED' ||
+        err.message?.includes('User not found') ||
+        err.message?.includes('Unauthorized');
+
+      if (isAuthError) {
+        console.log('🔒 UNAUTHENTICATED error detected');
+
+        // Token invalide ou utilisateur supprimé
         return new Observable((observer) => {
           (async () => {
             try {
               const refreshToken = await getRefreshToken();
+
+              // Pas de refresh token ou refresh échoue → déconnecter
               if (!refreshToken) {
+                console.log('❌ No refresh token, clearing tokens');
                 await clearTokens();
+                // Recharger la page pour rediriger vers Login
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/';
+                }
                 forward(operation).subscribe(observer);
                 return;
               }
 
-              // Appeler l'endpoint de refresh
+              // Tenter de refresh le token
+              console.log('🔄 Attempting token refresh...');
               const response = await fetch(`${getApiUrl()}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -62,19 +91,30 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
               });
 
               const result = await response.json();
+
+              // Refresh réussi → retry la requête
               if (result.data?.refreshToken) {
+                console.log('✅ Token refreshed successfully');
                 await saveTokens(
                   result.data.refreshToken.accessToken,
                   result.data.refreshToken.refreshToken
                 );
-                // Retry la requête avec le nouveau token
                 forward(operation).subscribe(observer);
               } else {
+                // Refresh échoué → déconnecter
+                console.log('❌ Token refresh failed, clearing tokens');
                 await clearTokens();
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/';
+                }
                 forward(operation).subscribe(observer);
               }
             } catch (error) {
+              console.error('❌ Error during token refresh:', error);
               await clearTokens();
+              if (typeof window !== 'undefined') {
+                window.location.href = '/';
+              }
               forward(operation).subscribe(observer);
             }
           })();
@@ -87,4 +127,15 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
 export const apolloClient = new ApolloClient({
   link: from([errorLink, authLink, httpLink]),
   cache: new InMemoryCache(),
+  defaultOptions: {
+    watchQuery: {
+      errorPolicy: 'all',
+    },
+    query: {
+      errorPolicy: 'all',
+    },
+    mutate: {
+      errorPolicy: 'all',
+    },
+  },
 });
