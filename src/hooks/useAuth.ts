@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { gql } from '@apollo/client';
 import { useMutation, useLazyQuery } from '@apollo/client/react';
 import { saveTokens, clearTokens, getAccessToken } from '../services/auth';
+import { apolloClient } from '../services/apollo';
 
 const OAUTH_LOGIN = gql`
   mutation OAuthLogin($input: OAuthInput!) {
@@ -76,6 +77,7 @@ export function useAuth() {
     });
     await saveTokens(data.oauthLogin.accessToken, data.oauthLogin.refreshToken);
     await loadUser();
+    return data.oauthLogin.isNewUser;
   };
 
   const sendLoginCode = async (email: string) => {
@@ -91,10 +93,12 @@ export function useAuth() {
       data.verifyLoginCode.refreshToken,
     );
     await loadUser();
+    return data.verifyLoginCode.isNewUser;
   };
 
   const logout = async () => {
     await clearTokens();
+    await apolloClient.clearStore();
     setUser(null);
   };
 

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -5,7 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { gql } from '@apollo/client';
-import { useQuery } from '@apollo/client/react';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
@@ -13,6 +14,7 @@ import { Button3D } from '../components/ui/Button3D';
 import { ProgressionMap } from '../components/progression/ProgressionMap';
 import { EnergyBar } from '../components/ui/EnergyBar';
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
+import { WelcomeGiftModal } from '../components/WelcomeGiftModal';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -26,6 +28,7 @@ const ME_QUERY = gql`
       gems
       energy
       maxEnergy
+      welcomeGiftSeen
     }
   }
 `;
@@ -42,11 +45,26 @@ const ENERGY_STATUS = gql`
   }
 `;
 
+const MARK_GIFT_VIEWED = gql`
+  mutation MarkWelcomeGiftAsViewed {
+    markWelcomeGiftAsViewed
+  }
+`;
+
 export function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { data, loading, error } = useQuery<any>(ME_QUERY);
+  const [markGiftViewed] = useMutation<any>(MARK_GIFT_VIEWED);
+  const [showGiftModal, setShowGiftModal] = useState(false);
+
+  // Check for new user gift on mount
+  useEffect(() => {
+    if (!data?.me?.welcomeGiftSeen && !loading) {
+      setShowGiftModal(true);
+    }
+  }, [data?.me?.welcomeGiftSeen, loading]);
 
   // Auto logout si erreur auth
   useAuthErrorHandler(error);
@@ -77,70 +95,80 @@ export function HomeScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header with safe area */}
-      <View
-        style={[
-          styles.header,
-          {
-            paddingTop: Math.max(insets.top, 12) + 8,
-            backgroundColor: isDark ? 'rgba(31, 48, 57, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-            borderBottomColor: colors.border,
-          },
-        ]}
-      >
-        <Text style={[styles.logo, { color: colors.primary, fontFamily: fonts.bodyBlack }]}>
-          ANIME DUEL
-        </Text>
+    <>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        {/* Header with safe area */}
+        <View
+          style={[
+            styles.header,
+            {
+              paddingTop: Math.max(insets.top, 12) + 8,
+              backgroundColor: isDark ? 'rgba(31, 48, 57, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+              borderBottomColor: colors.border,
+            },
+          ]}
+        >
+          <Text style={[styles.logo, { color: colors.primary, fontFamily: fonts.bodyBlack }]}>
+            ANIME DUEL
+          </Text>
 
-        {/* Energy and Currency Bar */}
-        <EnergyBar
-          current={data?.me?.energy || 0}
-          max={data?.me?.maxEnergy || 5}
-          coins={data?.me?.coins}
-        />
+          {/* Energy and Currency Bar */}
+          <EnergyBar
+            current={data?.me?.energy || 0}
+            max={data?.me?.maxEnergy || 5}
+            coins={data?.me?.coins}
+          />
 
-        <View style={styles.headerActions}>
-          <TouchableOpacity
-            style={[
-              styles.headerBtn,
-              {
-                backgroundColor: colors.surfaceElevated,
-                borderColor: colors.border,
-              },
-            ]}
-            onPress={() => navigation.navigate('Missions')}
-            activeOpacity={0.7}
-          >
-            <MaterialIcons name="flag" size={22} color={colors.cta} />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={[
+                styles.headerBtn,
+                {
+                  backgroundColor: colors.surfaceElevated,
+                  borderColor: colors.border,
+                },
+              ]}
+              onPress={() => navigation.navigate('Missions')}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="flag" size={22} color={colors.cta} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Progression Map - fills remaining space */}
+        <View style={styles.mapContainer}>
+          <ProgressionMap currentLevel={currentLevel} maxLevel={maxLevel} onPlayLevel={handlePlay} />
+        </View>
+
+        {/* Floating Play Button - positioned above tab bar */}
+        <View
+          style={[
+            styles.fab,
+            {
+              bottom: Math.max(insets.bottom, 12) + 68, // tab bar height + spacing
+            },
+          ]}
+        >
+          <Button3D
+            title="JOUER"
+            color={colors.primary}
+            darkColor={colors.primaryDark}
+            onPress={handlePlay}
+            size="large"
+            style={styles.playButton}
+          />
         </View>
       </View>
 
-      {/* Progression Map - fills remaining space */}
-      <View style={styles.mapContainer}>
-        <ProgressionMap currentLevel={currentLevel} maxLevel={maxLevel} onPlayLevel={handlePlay} />
-      </View>
-
-      {/* Floating Play Button - positioned above tab bar */}
-      <View
-        style={[
-          styles.fab,
-          {
-            bottom: Math.max(insets.bottom, 12) + 68, // tab bar height + spacing
-          },
-        ]}
-      >
-        <Button3D
-          title="JOUER"
-          color={colors.primary}
-          darkColor={colors.primaryDark}
-          onPress={handlePlay}
-          size="large"
-          style={styles.playButton}
-        />
-      </View>
-    </View>
+      <WelcomeGiftModal
+        visible={showGiftModal}
+        onClose={async () => {
+          await markGiftViewed();
+          setShowGiftModal(false);
+        }}
+      />
+    </>
   );
 }
 

@@ -1,12 +1,17 @@
 import { io, Socket } from 'socket.io-client';
+import { Platform } from 'react-native';
 
-const SOCKET_URL = 'http://localhost:3001';
+const getSocketUrl = () => {
+  if (Platform.OS === 'web') return process.env.EXPO_PUBLIC_SOCKET_URL_WEB || 'http://localhost:3001';
+  if (Platform.OS === 'android') return process.env.EXPO_PUBLIC_SOCKET_URL_ANDROID || 'http://10.0.2.2:3001';
+  return process.env.EXPO_PUBLIC_SOCKET_URL_IOS || 'http://localhost:3001';
+};
 
 let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    socket = io(SOCKET_URL, {
+    socket = io(getSocketUrl(), {
       autoConnect: false,
       transports: ['websocket'],
     });

@@ -57,86 +57,88 @@ export function LoginScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.cta, fontFamily: fonts.heading }]}>
-        ANIME DUEL
-      </Text>
-      <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: fonts.body }]}>
-        Devine le personnage !
-      </Text>
+    <>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.title, { color: colors.cta, fontFamily: fonts.heading }]}>
+          ANIME DUEL
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+          Devine le personnage !
+        </Text>
 
-      <View style={styles.oauthSection}>
-        <TouchableOpacity
-          style={[styles.oauthBtn, { backgroundColor: '#4285F4' }]}
-          onPress={() => handleOAuth('GOOGLE')}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Google</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.oauthBtn, { backgroundColor: '#5865F2' }]}
-          onPress={() => handleOAuth('DISCORD')}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Discord</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.oauthBtn, { backgroundColor: colors.text }]}
-          onPress={() => handleOAuth('APPLE')}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.btnText, { fontFamily: fonts.bodyBold, color: colors.background }]}>
-            Apple
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.divider}>
-        <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
-        <Text style={[styles.dividerText, { color: colors.textMuted, fontFamily: fonts.body }]}>ou</Text>
-        <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
-      </View>
-
-      <View style={styles.emailSection}>
-        <TextInput
-          style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, fontFamily: fonts.body }]}
-          placeholder="Email"
-          placeholderTextColor={colors.textMuted}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        {!codeSent ? (
+        <View style={styles.oauthSection}>
           <TouchableOpacity
-            style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
-            onPress={handleSendCode}
+            style={[styles.oauthBtn, { backgroundColor: '#4285F4' }]}
+            onPress={() => handleOAuth('GOOGLE')}
             activeOpacity={0.8}
           >
-            <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Recevoir un code</Text>
+            <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Google</Text>
           </TouchableOpacity>
-        ) : (
-          <>
-            <TextInput
-              style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, fontFamily: fonts.body }]}
-              placeholder="Code a 6 chiffres"
-              placeholderTextColor={colors.textMuted}
-              value={code}
-              onChangeText={setCode}
-              keyboardType="number-pad"
-              maxLength={6}
-            />
+          <TouchableOpacity
+            style={[styles.oauthBtn, { backgroundColor: '#5865F2' }]}
+            onPress={() => handleOAuth('DISCORD')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Discord</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.oauthBtn, { backgroundColor: colors.text }]}
+            onPress={() => handleOAuth('APPLE')}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.btnText, { fontFamily: fonts.bodyBold, color: colors.background }]}>
+              Apple
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.divider}>
+          <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+          <Text style={[styles.dividerText, { color: colors.textMuted, fontFamily: fonts.body }]}>ou</Text>
+          <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
+        </View>
+
+        <View style={styles.emailSection}>
+          <TextInput
+            style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, fontFamily: fonts.body }]}
+            placeholder="Email"
+            placeholderTextColor={colors.textMuted}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          {!codeSent ? (
             <TouchableOpacity
-              style={[styles.primaryBtn, { backgroundColor: colors.cta }]}
-              onPress={handleVerifyCode}
+              style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
+              onPress={handleSendCode}
               activeOpacity={0.8}
             >
-              <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Verifier</Text>
+              <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Recevoir un code</Text>
             </TouchableOpacity>
-          </>
-        )}
+          ) : (
+            <>
+              <TextInput
+                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, fontFamily: fonts.body }]}
+                placeholder="Code a 6 chiffres"
+                placeholderTextColor={colors.textMuted}
+                value={code}
+                onChangeText={setCode}
+                keyboardType="number-pad"
+                maxLength={6}
+              />
+              <TouchableOpacity
+                style={[styles.primaryBtn, { backgroundColor: colors.cta }]}
+                onPress={handleVerifyCode}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Verifier</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
       </View>
-    </View>
+    </>
   );
 }
 

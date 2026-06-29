@@ -6,16 +6,18 @@ import { Platform } from 'react-native';
 import { getAccessToken, getRefreshToken, saveTokens, clearTokens } from './auth';
 
 declare module '@apollo/client' {
-  interface DeclareDefaultOptions {
-    watchQuery: {
-      errorPolicy: 'all';
-    };
-    query: {
-      errorPolicy: 'all';
-    };
-    mutate: {
-      errorPolicy: 'all';
-    };
+  namespace ApolloClient {
+    namespace DeclareDefaultOptions {
+      interface WatchQuery {
+        errorPolicy: 'all';
+      }
+      interface Query {
+        errorPolicy: 'all';
+      }
+      interface Mutate {
+        errorPolicy: 'all';
+      }
+    }
   }
 }
 
@@ -51,7 +53,7 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
         err.message?.includes('Unauthorized');
 
       if (isAuthError) {
-        console.log('🔒 UNAUTHENTICATED error detected');
+        if (__DEV__) console.log('UNAUTHENTICATED error detected');
 
         // Token invalide ou utilisateur supprimé
         return new Observable((observer) => {
@@ -61,7 +63,7 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
 
               // Pas de refresh token ou refresh échoue → déconnecter
               if (!refreshToken) {
-                console.log('❌ No refresh token, clearing tokens');
+                if (__DEV__) console.log('No refresh token, clearing tokens');
                 await clearTokens();
                 // Recharger la page pour rediriger vers Login
                 if (typeof window !== 'undefined') {
@@ -72,7 +74,7 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
               }
 
               // Tenter de refresh le token
-              console.log('🔄 Attempting token refresh...');
+              if (__DEV__) console.log('Attempting token refresh...');
               const response = await fetch(`${getApiUrl()}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -94,7 +96,7 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
 
               // Refresh réussi → retry la requête
               if (result.data?.refreshToken) {
-                console.log('✅ Token refreshed successfully');
+                if (__DEV__) console.log('Token refreshed successfully');
                 await saveTokens(
                   result.data.refreshToken.accessToken,
                   result.data.refreshToken.refreshToken
@@ -102,7 +104,7 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
                 forward(operation).subscribe(observer);
               } else {
                 // Refresh échoué → déconnecter
-                console.log('❌ Token refresh failed, clearing tokens');
+                if (__DEV__) console.log('Token refresh failed, clearing tokens');
                 await clearTokens();
                 if (typeof window !== 'undefined') {
                   window.location.href = '/';
@@ -110,7 +112,7 @@ const errorLink = onError(({ graphQLErrors, operation, forward }) => {
                 forward(operation).subscribe(observer);
               }
             } catch (error) {
-              console.error('❌ Error during token refresh:', error);
+              if (__DEV__) console.error('Error during token refresh:', error);
               await clearTokens();
               if (typeof window !== 'undefined') {
                 window.location.href = '/';
