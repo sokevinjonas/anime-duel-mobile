@@ -11,7 +11,6 @@ import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
 import { Card } from '../components/ui/Card';
 import { SectionTitle } from '../components/ui/SectionTitle';
-import { BerryIcon, SharinganIcon } from '../components/icons';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -118,10 +117,10 @@ export function ProfileScreen() {
         {/* Progression */}
         <SectionTitle>Progression</SectionTitle>
         <Card elevated style={styles.progressCard}>
-          <View style={styles.progressHeader}>
+          <View style={styles.progressRow}>
             <View>
               <Text style={[styles.levelLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>
-                Niveau actuel
+                Niveau
               </Text>
               <Text style={[styles.levelValue, { color: colors.primary, fontFamily: fonts.heading }]}>
                 {user?.currentLevel}
@@ -133,45 +132,16 @@ export function ProfileScreen() {
                 {user?.currentTier}
               </Text>
             </View>
-          </View>
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          <View style={styles.winsRow}>
-            <Text style={[styles.winsLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>
-              Victoires totales
-            </Text>
-            <Text style={[styles.winsValue, { color: colors.cta, fontFamily: fonts.heading }]}>
-              {user?.totalWins} 🏆
-            </Text>
+            <View>
+              <Text style={[styles.winsLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+                Victoires
+              </Text>
+              <Text style={[styles.winsValue, { color: colors.cta, fontFamily: fonts.heading }]}>
+                {user?.totalWins}
+              </Text>
+            </View>
           </View>
         </Card>
-
-        {/* Inventaire */}
-        <SectionTitle>Inventaire</SectionTitle>
-        <View style={styles.inventoryRow}>
-          <Card elevated style={styles.inventoryCard}>
-            <View style={[styles.inventoryIcon, { backgroundColor: colors.warning + '15' }]}>
-              <BerryIcon size={32} color={colors.warning} />
-            </View>
-            <Text style={[styles.inventoryValue, { color: colors.warning, fontFamily: fonts.heading }]}>
-              {user?.berry}
-            </Text>
-            <Text style={[styles.inventoryLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>
-              Berry
-            </Text>
-          </Card>
-
-          <Card elevated style={styles.inventoryCard}>
-            <View style={[styles.inventoryIcon, { backgroundColor: colors.primary + '15' }]}>
-              <SharinganIcon size={32} color={colors.error} />
-            </View>
-            <Text style={[styles.inventoryValue, { color: colors.primary, fontFamily: fonts.heading }]}>
-              {user?.sharinganCount}
-            </Text>
-            <Text style={[styles.inventoryLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>
-              Sharingan
-            </Text>
-          </Card>
-        </View>
 
         {/* Paramètres & Infos */}
         <SectionTitle>Paramètres & Infos</SectionTitle>
@@ -430,75 +400,39 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   progressCard: {
-    padding: 18,
+    padding: 12,
   },
-  progressHeader: {
+  progressRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     alignItems: 'center',
+    gap: 10,
   },
   levelLabel: {
-    fontSize: 13,
-    marginBottom: 4,
+    fontSize: 11,
+    marginBottom: 3,
   },
   levelValue: {
-    fontSize: 32,
+    fontSize: 22,
   },
   tierBadge: {
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
   },
   tierLabel: {
-    fontSize: 11,
-    marginBottom: 2,
+    fontSize: 10,
   },
   tierValue: {
-    fontSize: 24,
-  },
-  divider: {
-    height: 1,
-    marginVertical: 16,
-  },
-  winsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    fontSize: 18,
   },
   winsLabel: {
-    fontSize: 14,
+    fontSize: 11,
+    marginBottom: 3,
   },
   winsValue: {
     fontSize: 20,
-  },
-  inventoryRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  inventoryCard: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 12,
-  },
-  inventoryIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10,
-  },
-  inventoryEmoji: {
-    fontSize: 24,
-  },
-  inventoryValue: {
-    fontSize: 24,
-    marginBottom: 2,
-  },
-  inventoryLabel: {
-    fontSize: 12,
   },
   shortcuts: {
     flexDirection: 'row',
