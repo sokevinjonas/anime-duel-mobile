@@ -16,6 +16,7 @@ import { CharacterPicker } from '../components/CharacterPicker';
 import { SharinganEyeIcon } from '../components/icons/SharinganEyeIcon';
 import { getSocket, connectSocket } from '../services/socket';
 import { getAccessToken } from '../services/auth';
+import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
 
@@ -35,6 +36,7 @@ export function MatchScreen() {
   const route = useRoute<MatchRoute>();
   const navigation = useNavigation<Nav>();
   const { colors } = useTheme();
+  const { user } = useAuth();
   const { roomCode: joinCode } = route.params || {};
 
   const [phase, setPhase] = useState<GamePhase>('connecting');
@@ -47,7 +49,8 @@ export function MatchScreen() {
   const [selectedChar, setSelectedChar] = useState<string | null>(null);
   const [result, setResult] = useState<{ winnerId: string | null; reason: string } | null>(null);
   const [timerSeconds, setTimerSeconds] = useState(60);
-  const [myUserId] = useState('current-user-id'); // TODO: get from auth context
+  const [myUserId] = useState(user?.id || '');
+  const [waitingForResponse, setWaitingForResponse] = useState(false);
 
   const setupSocket = useCallback(async () => {
     const token = await getAccessToken();
@@ -73,11 +76,26 @@ export function MatchScreen() {
 
     socket.on('turn:ai_response', (data: QuestionEntry) => {
       setQuestions((prev) => [...prev, data]);
+      setWaitingForResponse(false); // Hide waiting indicator
     });
 
     socket.on('turn:end', (data: { activePlayerId: string; timerEnd: number }) => {
       setIsMyTurn(data.activePlayerId === myUserId);
+      setWaitingForResponse(false); // Clear waiting state
+      setTimerSeconds(60); // Reset timer for new turn
       updateTimer(data.timerEnd);
+    });
+
+    socket.on('turn:sharingan_used', (data: { userId: string; hint: string }) => {
+      if (data.userId !== myUserId) {
+        // Opponent used Sharingan, show their hint
+        setQuestions((prev) => [...prev, {
+          playerId: data.userId,
+          question: `💡 Indice: ${data.hint}`,
+          answer: 'PARTIALLY' as const,
+          turnNumber: 0,
+        }]);
+      }
     });
 
     socket.on('turn:sharingan_result', (data: { eliminatedGroup: string }) => {
@@ -149,6 +167,7 @@ export function MatchScreen() {
     const socket = getSocket();
     socket.emit('turn:question', { question: question.trim() });
     setQuestion('');
+    setWaitingForResponse(true); // Show waiting indicator
   };
 
   const handleUseSharingan = () => {
@@ -234,6 +253,15 @@ export function MatchScreen() {
         <Text style={styles.timer}>{timerSeconds}s</Text>
       </View>
 
+      {waitingForResponse && (
+        <View style={styles.waitingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.waitingText, { color: colors.text, fontFamily: fonts.body }]}>
+            En attente de la réponse de l'adversaire...
+          </Text>
+        </View>
+      )}
+
       <FlatList
         data={questions}
         keyExtractor={(_, i) => i.toString()}
@@ -304,6 +332,18 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   statusText: { fontSize: 20, color: '#fff', marginBottom: 16 },
+  waitingContainer: {
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    margin: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e94560',
+  },
+  waitingText: { fontSize: 14, textAlign: 'center' },
   codeDisplay: {
     fontSize: 36,
     fontWeight: 'bold',

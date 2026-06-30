@@ -74,6 +74,8 @@ export function SoloGameScreen() {
   const [sharinganRemaining, setJokersRemaining] = useState(3);
   const [aiAvatarUrl, setAiAvatarUrl] = useState<string>('');
   const [showSharinganModal, setShowSharinganModal] = useState(false);
+  const [timePerQuestion] = useState(60); // seconds
+  const [remainingTime, setRemainingTime] = useState(60);
 
   const [startGame, { loading: starting, error: startError }] = useMutation(START_SOLO_GAME);
   const [askQuestion, { loading: asking, error: askError }] = useMutation(ASK_QUESTION);
@@ -88,6 +90,24 @@ export function SoloGameScreen() {
   useEffect(() => {
     handleStartGame();
   }, []);
+
+  // Timer countdown per question
+  useEffect(() => {
+    if (!sessionId || gameOver || remainingTime <= 0) return;
+
+    const interval = setInterval(() => {
+      setRemainingTime(prev => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [sessionId, gameOver, remainingTime]);
+
+  // Reset timer when question changes
+  useEffect(() => {
+    if (sessionId && !gameOver) {
+      setRemainingTime(timePerQuestion);
+    }
+  }, [turnNumber, sessionId, gameOver]);
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -264,9 +284,14 @@ export function SoloGameScreen() {
           Mode Solo
         </Text>
         <View style={styles.headerRight}>
+          <View style={styles.headerStats}>
           <Text style={[styles.questionsCount, { color: colors.primary, fontFamily: fonts.bodyBold }]}>
             {turnNumber}/{maxQuestions}
           </Text>
+          <Text style={[styles.timerText, { color: remainingTime <= 10 ? colors.error : colors.warning, fontFamily: fonts.bodyBold }]}>
+            ⏱️ {remainingTime}s
+          </Text>
+        </View>
           <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
             <TouchableOpacity
               style={[styles.sharinganBtn, { backgroundColor: sharinganRemaining > 0 ? colors.orange : colors.border }]}
@@ -394,7 +419,9 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 18, flex: 1, marginLeft: 12 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  headerStats: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   questionsCount: { fontSize: 16 },
+  timerText: { fontSize: 14, fontWeight: 'bold' },
   sharinganBtn: {
     flexDirection: 'row',
     alignItems: 'center',
