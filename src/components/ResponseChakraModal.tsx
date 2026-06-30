@@ -6,12 +6,49 @@ import { fonts } from '../theme/fonts';
 interface ResponseChakraModalProps {
   visible: boolean;
   success: boolean;
-  message: string;
+  errorType?: 'insufficient_berry' | 'max_chakra' | 'max_fillers' | 'other';
+  currentBerry?: number;
+  cost?: number;
+  newChakra?: number;
+  message?: string;
   onClose: () => void;
+  onGoToShop?: () => void;
 }
 
-export function ResponseChakraModal({ visible, success, message, onClose }: ResponseChakraModalProps) {
+export function ResponseChakraModal({
+  visible,
+  success,
+  errorType,
+  currentBerry,
+  cost,
+  newChakra,
+  message,
+  onClose,
+  onGoToShop
+}: ResponseChakraModalProps) {
   const { colors } = useTheme();
+
+  // Construire le message en fonction du type
+  const displayMessage = (() => {
+    if (success && newChakra) {
+      return `Tu as maintenant ${newChakra} Chakra !`;
+    }
+
+    if (errorType === 'insufficient_berry' && currentBerry !== undefined && cost !== undefined) {
+      const manquant = cost - currentBerry;
+      return `Pas assez de Berry !\n\nTu as : ${currentBerry} Berry\nCoût : ${cost} Berry\nManquant : ${manquant} Berry`;
+    }
+
+    if (errorType === 'max_chakra') {
+      return 'Ton Chakra est déjà au maximum !';
+    }
+
+    if (errorType === 'max_fillers') {
+      return 'Tu as déjà utilisé tes 3 Fillers aujourd\'hui !';
+    }
+
+    return message || 'Une erreur est survenue';
+  })();
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -28,14 +65,34 @@ export function ResponseChakraModal({ visible, success, message, onClose }: Resp
             {success ? 'Chakra rechargé !' : 'Oups !'}
           </Text>
           <Text style={[styles.message, { color: colors.textSecondary, fontFamily: fonts.body }]}>
-            {message}
+            {displayMessage}
           </Text>
-          <TouchableOpacity
-            style={[styles.btn, { backgroundColor: success ? colors.success : colors.primary }]}
-            onPress={onClose}
-          >
-            <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>OK</Text>
-          </TouchableOpacity>
+
+          {/* Boutons */}
+          {errorType === 'insufficient_berry' && onGoToShop ? (
+            <View style={styles.buttons}>
+              <TouchableOpacity
+                style={[styles.btn, styles.btnSecondary, { backgroundColor: colors.border }]}
+                onPress={onClose}
+              >
+                <Text style={[styles.btnText, { color: colors.text, fontFamily: fonts.bodyBold }]}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.btn, styles.btnPrimary, { backgroundColor: colors.warning }]}
+                onPress={onGoToShop}
+              >
+                <MaterialIcons name="store" size={18} color="#000" />
+                <Text style={[styles.btnText, { color: '#000', fontFamily: fonts.bodyBold }]}>Boutique</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={[styles.btn, { backgroundColor: success ? colors.success : colors.primary }]}
+              onPress={onClose}
+            >
+              <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>OK</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -72,11 +129,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
   },
+  buttons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+    width: '100%',
+  },
   btn: {
     paddingVertical: 12,
-    paddingHorizontal: 40,
+    paddingHorizontal: 24,
     borderRadius: 12,
     marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  btnPrimary: {
+    flex: 1,
+  },
+  btnSecondary: {
+    flex: 0.8,
   },
   btnText: {
     fontSize: 16,
