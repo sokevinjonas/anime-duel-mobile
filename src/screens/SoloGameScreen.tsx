@@ -73,7 +73,7 @@ export function SoloGameScreen() {
   const [startGame, { loading: starting, error: startError }] = useMutation(START_SOLO_GAME);
   const [askQuestion, { loading: asking, error: askError }] = useMutation(ASK_QUESTION);
   const [submitGuess, { loading: guessing, error: guessError }] = useMutation(SUBMIT_GUESS);
-  const [useSharingan, { loading: sharinganLoading }] = useMutation(USE_JOKER);
+  const [useSharingan, { loading: sharinganLoading }] = useMutation(USE_SHARINGAN);
 
   // Auto logout si erreur auth
   useAuthErrorHandler(startError);
