@@ -173,43 +173,6 @@ export function ProfileScreen() {
           </Card>
         </View>
 
-        {/* Actions rapides */}
-        <SectionTitle>Actions rapides</SectionTitle>
-        <View style={styles.shortcuts}>
-          <TouchableOpacity
-            style={[styles.shortcut, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
-            onPress={() => navigation.navigate('History' as any)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.shortcutEmoji}>📜</Text>
-            <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
-              Historique
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.shortcut, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
-            onPress={() => navigation.navigate('Shop' as any)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.shortcutEmoji}>🍜</Text>
-            <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
-              Ichiraku Ramen
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.shortcut, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
-            onPress={() => navigation.navigate('Leaderboard' as any)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.shortcutEmoji}>🎖️</Text>
-            <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
-              Hall des Kage
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Paramètres & Infos */}
         <SectionTitle>Paramètres & Infos</SectionTitle>
         <View style={styles.settingsSection}>
@@ -218,7 +181,7 @@ export function ProfileScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.settingContent}>
-              <Text style={[styles.settingIcon]}>👤</Text>
+              <MaterialIcons name="person" size={22} color={colors.primary} />
               <View style={styles.settingInfo}>
                 <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                   Mon Profil
@@ -236,7 +199,7 @@ export function ProfileScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.settingContent}>
-              <Text style={[styles.settingIcon]}>📊</Text>
+              <MaterialIcons name="bar-chart" size={22} color={colors.warning} />
               <View style={styles.settingInfo}>
                 <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                   Mes Statistiques
@@ -254,7 +217,7 @@ export function ProfileScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.settingContent}>
-              <Text style={[styles.settingIcon]}>🏆</Text>
+              <MaterialIcons name="emoji-events" size={22} color={colors.warning} />
               <View style={styles.settingInfo}>
                 <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                   Mes Succès
@@ -272,7 +235,7 @@ export function ProfileScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.settingContent}>
-              <Text style={[styles.settingIcon]}>⚙️</Text>
+              <MaterialIcons name="settings" size={22} color={colors.primary} />
               <View style={styles.settingInfo}>
                 <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                   Paramètres
@@ -287,10 +250,67 @@ export function ProfileScreen() {
 
           <TouchableOpacity
             style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+            onPress={() => navigation.navigate('History' as any)}
             activeOpacity={0.7}
           >
             <View style={styles.settingContent}>
-              <Text style={[styles.settingIcon]}>❓</Text>
+              <MaterialIcons name="history" size={22} color={colors.primary} />
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                  Parchemin
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+                  Mes matchs et historique
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+            onPress={() => navigation.navigate('Leaderboard' as any)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <MaterialIcons name="leaderboard" size={22} color={colors.warning} />
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                  Hall des Kage
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+                  Top des meilleurs joueurs
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+            onPress={() => navigation.navigate('Shop' as any)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <MaterialIcons name="shopping-cart" size={22} color={colors.warning} />
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                  Ichiraku Ramen
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+                  Acheter des ressources
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <MaterialIcons name="help-outline" size={22} color={colors.primary} />
               <View style={styles.settingInfo}>
                 <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                   Aide & Support
@@ -308,7 +328,7 @@ export function ProfileScreen() {
             activeOpacity={0.7}
           >
             <View style={styles.settingContent}>
-              <Text style={[styles.settingIcon]}>ℹ️</Text>
+              <MaterialIcons name="info-outline" size={22} color={colors.primary} />
               <View style={styles.settingInfo}>
                 <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                   À propos
@@ -484,19 +504,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
-  shortcut: {
-    flex: 1,
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-    gap: 6,
-  },
-  shortcutEmoji: {
-    fontSize: 24,
-  },
-  shortcutText: {
-    fontSize: 13,
-  },
   settingsSection: {
     gap: 12,
   },
@@ -513,9 +520,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-  },
-  settingIcon: {
-    fontSize: 24,
   },
   settingInfo: {
     flex: 1,
