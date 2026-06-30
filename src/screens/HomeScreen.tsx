@@ -223,6 +223,7 @@ export function HomeScreen() {
         visible={showEnergyModal}
         onClose={handleEnergyModalClose}
         onShowResponse={handleShowResponse}
+        onGoToShop={handleGoToShop}
       />
 
       <ResponseChakraModal

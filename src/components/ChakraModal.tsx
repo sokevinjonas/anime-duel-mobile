@@ -51,12 +51,14 @@ interface ChakraModalProps {
     cost?: number;
     newChakra?: number;
   }) => void;
+  onGoToShop: () => void;
 }
 
 export function ChakraModal({
   visible,
   onClose,
   onShowResponse,
+  onGoToShop,
 }: ChakraModalProps) {
   const { colors } = useTheme();
   const { data, loading, refetch } = useQuery(USER_CHAKRA_QUERY, { skip: !visible });
@@ -284,12 +286,10 @@ export function ChakraModal({
                   title="ACHETER BERRY"
                   color={colors.warning}
                   darkColor={colors.warningDark}
-                  onPress={onShowResponse.bind(null, {
-                    success: false,
-                    errorType: 'insufficient_berry' as const,
-                    currentBerry,
-                    cost: refillPriceBerry,
-                  })}
+                  onPress={() => {
+                    onClose();
+                    onGoToShop();
+                  }}
                   size="medium"
                 />
               )}
