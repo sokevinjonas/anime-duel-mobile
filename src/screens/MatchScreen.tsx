@@ -79,8 +79,8 @@ export function MatchScreen() {
       updateTimer(data.timerEnd);
     });
 
-    socket.on('turn:joker_result', (data: { eliminatedGroup: string }) => {
-      Alert.alert('Joker', `Éliminé : ${data.eliminatedGroup}`);
+    socket.on('turn:sharingan_result', (data: { eliminatedGroup: string }) => {
+      Alert.alert('Sharingan', `Éliminé : ${data.eliminatedGroup}`);
     });
 
     socket.on('turn:answer_wrong', () => {
@@ -150,10 +150,10 @@ export function MatchScreen() {
     setQuestion('');
   };
 
-  const handleUseJoker = () => {
+  const handleUseSharingan = () => {
     if (!isMyTurn) return;
     const socket = getSocket();
-    socket.emit('turn:use_joker');
+    socket.emit('turn:use_sharingan');
   };
 
   const handleSubmitGuess = () => {
@@ -270,8 +270,8 @@ export function MatchScreen() {
               </TouchableOpacity>
             </View>
             <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.jokerBtn} onPress={handleUseJoker}>
-                <Text style={styles.jokerBtnText}>Joker</Text>
+              <TouchableOpacity style={styles.sharinganBtn} onPress={handleUseSharingan}>
+                <Text style={styles.sharinganBtnText}>👁️ Sharingan</Text>
               </TouchableOpacity>
               <View style={styles.guessRow}>
                 <TextInput
@@ -369,14 +369,14 @@ const styles = StyleSheet.create({
   },
   sendBtnText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
   actionButtons: { flexDirection: 'row', gap: 8 },
-  jokerBtn: {
+  sharinganBtn: {
     backgroundColor: '#8e44ad',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 16,
     justifyContent: 'center',
   },
-  jokerBtnText: { color: '#fff', fontWeight: '600' },
+  sharinganBtnText: { color: '#fff', fontWeight: '600' },
   guessRow: { flex: 1, flexDirection: 'row', gap: 8 },
   guessInput: {
     flex: 1,

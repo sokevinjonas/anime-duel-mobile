@@ -13,7 +13,7 @@ import { fonts } from '../theme/fonts';
 import { Button3D } from '../components/ui/Button3D';
 import { ProgressionMap } from '../components/progression/ProgressionMap';
 import { EnergyBar } from '../components/ui/EnergyBar';
-import { EnergyModal } from '../components/EnergyModal';
+import { ChakraModal } from '../components/ChakraModal';
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
 import { useRefetchUser } from '../hooks/useRefetchUser';
 import { WelcomeGiftModal } from '../components/WelcomeGiftModal';
@@ -26,10 +26,9 @@ const ME_QUERY = gql`
       id
       currentLevel
       currentTier
-      coins
-      gems
-      energy
-      maxEnergy
+      berry
+      chakra
+      maxChakra
       welcomeGiftSeen
     }
   }
@@ -65,7 +64,7 @@ export function HomeScreen() {
 
   const currentLevel = data?.me?.currentLevel || 1;
   const currentTier = data?.me?.currentTier || 0;
-  const currentEnergy = data?.me?.energy || 0;
+  const currentChakra = data?.me?.chakra || 0;
 
   // Calculer maxLevel selon le palier actuel
   // Palier 0 = 15 niveaux, Palier 1+ = 25 niveaux chacun
@@ -82,10 +81,10 @@ export function HomeScreen() {
   };
 
   const handlePlayConfirmed = () => {
-    if (currentEnergy <= 0) {
+    if (currentChakra <= 0) {
       Alert.alert(
-        '⚡ Pas d\'énergie',
-        'Tu n\'as plus d\'énergie. Attends la régénération ou utilise des gems.',
+        '⚡ Pas de Chakra',
+        'Tu n\'as plus de Chakra. Attends la régénération ou utilise un refill.',
       );
       return;
     }
@@ -125,11 +124,11 @@ export function HomeScreen() {
             ANIME DUEL
           </Text>
 
-          {/* Energy and Currency Bar */}
+          {/* Chakra and Currency Bar */}
           <EnergyBar
-            current={data?.me?.energy || 0}
-            max={data?.me?.maxEnergy || 5}
-            coins={data?.me?.coins}
+            current={data?.me?.chakra || 0}
+            max={data?.me?.maxChakra || 8}
+            berry={data?.me?.berry}
             onEnergyPress={() => setShowEnergyModal(true)}
           />
 
@@ -188,10 +187,9 @@ export function HomeScreen() {
         }}
       />
 
-      <EnergyModal
+      <ChakraModal
         visible={showEnergyModal}
         onClose={handleEnergyModalClose}
-        currentGems={data?.me?.gems || 0}
         onPlay={handlePlayConfirmed}
       />
     </>

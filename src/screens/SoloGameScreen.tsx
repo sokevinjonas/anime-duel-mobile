@@ -43,11 +43,11 @@ const SUBMIT_GUESS = gql`
   }
 `;
 
-const USE_JOKER = gql`
-  mutation SoloUseJoker($sessionId: String!) {
-    soloUseJoker(sessionId: $sessionId) {
+const USE_SHARINGAN = gql`
+  mutation SoloUseSharingan($sessionId: String!) {
+    soloUseSharingan(sessionId: $sessionId) {
       hint
-      jokersRemaining
+      sharinganRemaining
     }
   }
 `;
@@ -67,13 +67,13 @@ export function SoloGameScreen() {
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState('');
-  const [jokersRemaining, setJokersRemaining] = useState(3);
+  const [sharinganRemaining, setJokersRemaining] = useState(3);
   const [aiAvatarUrl, setAiAvatarUrl] = useState<string>('');
 
   const [startGame, { loading: starting, error: startError }] = useMutation(START_SOLO_GAME);
   const [askQuestion, { loading: asking, error: askError }] = useMutation(ASK_QUESTION);
   const [submitGuess, { loading: guessing, error: guessError }] = useMutation(SUBMIT_GUESS);
-  const [useJoker, { loading: jokerLoading }] = useMutation(USE_JOKER);
+  const [useSharingan, { loading: sharinganLoading }] = useMutation(USE_JOKER);
 
   // Auto logout si erreur auth
   useAuthErrorHandler(startError);
@@ -141,7 +141,7 @@ export function SoloGameScreen() {
   };
 
   const handleUseJoker = async () => {
-    if (!sessionId || jokersRemaining <= 0) return;
+    if (!sessionId || sharinganRemaining <= 0) return;
 
     try {
       Animated.sequence([
@@ -149,11 +149,11 @@ export function SoloGameScreen() {
         Animated.timing(scaleAnim, { toValue: 1, duration: 100, useNativeDriver: true }),
       ]).start();
 
-      const { data } = await useJoker({ variables: { sessionId } });
+      const { data } = await useSharingan({ variables: { sessionId } });
 
       if (data?.soloUseJoker?.hint) {
         setMessages(prev => [...prev, { type: 'ai', text: `💡 Indice: ${data.soloUseJoker.hint}` }]);
-        setJokersRemaining(data.soloUseJoker.jokersRemaining);
+        setJokersRemaining(data.soloUseJoker.sharinganRemaining);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     } catch (error) {
@@ -245,11 +245,11 @@ export function SoloGameScreen() {
           </Text>
           <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
             <TouchableOpacity
-              style={[styles.jokerBtn, { backgroundColor: jokersRemaining > 0 ? colors.orange : colors.border }]}
+              style={[styles.sharinganBtn, { backgroundColor: sharinganRemaining > 0 ? colors.orange : colors.border }]}
               onPress={handleUseJoker}
-              disabled={jokersRemaining <= 0 || jokerLoading}
+              disabled={sharinganRemaining <= 0 || sharinganLoading}
             >
-              <Text style={styles.jokerText}>🃏 {jokersRemaining}</Text>
+              <Text style={styles.sharinganText}>👁️ {sharinganRemaining}</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -358,14 +358,14 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, flex: 1, marginLeft: 12 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   questionsCount: { fontSize: 16 },
-  jokerBtn: {
+  sharinganBtn: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  jokerText: { fontSize: 16, fontWeight: 'bold' },
+  sharinganText: { fontSize: 16, fontWeight: 'bold' },
   historyScroll: { flex: 1 },
   historyContent: { padding: 12, gap: 12 },
   messageRow: {
