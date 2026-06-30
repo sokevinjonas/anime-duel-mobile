@@ -14,7 +14,6 @@ const REFILL_CHAKRA_BERRY = gql`
       success
       newChakra
       berrySpent
-      message
     }
   }
 `;
@@ -25,7 +24,6 @@ const REFILL_CHAKRA_FILLER = gql`
       success
       newChakra
       fillersUsedToday
-      message
     }
   }
 `;
@@ -38,7 +36,6 @@ const USER_CHAKRA_QUERY = gql`
       maxChakra
       berry
       fillerUsedToday
-      lastChakraRegen
     }
   }
 `;
@@ -72,26 +69,16 @@ export function ChakraModal({
   const canUseFiller = fillersUsed < 3;
 
   // Estimate time to next Chakra (30 min per batch of 3)
+  // Note: Timer is approximate since we don't have lastChakraRegen from backend yet
   useEffect(() => {
     if (!visible || currentChakra >= maxChakra) {
       setTimeRemaining(0);
       return;
     }
 
-    const lastRegen = user?.lastChakraRegen ? new Date(user.lastChakraRegen).getTime() : Date.now();
-    const regenTimeMs = 30 * 60 * 1000; // 30 minutes
-
-    const updateTimer = () => {
-      const elapsed = Date.now() - lastRegen;
-      const remaining = Math.max(0, regenTimeMs - elapsed);
-      setTimeRemaining(remaining);
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-
-    return () => clearInterval(interval);
-  }, [visible, currentChakra, maxChakra, user?.lastChakraRegen]);
+    // Show static timer of 30 min (will be accurate once backend exposes lastChakraRegen)
+    setTimeRemaining(30 * 60 * 1000);
+  }, [visible, currentChakra, maxChakra]);
 
   const formatTime = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
@@ -103,7 +90,7 @@ export function ChakraModal({
     try {
       const { data: result } = await refillBerry();
       if (result.refillChakraWithBerry.success) {
-        Alert.alert('Chakra rechargé', result.refillChakraWithBerry.message);
+        Alert.alert('Chakra rechargé', `Tu as maintenant ${result.refillChakraWithBerry.newChakra} Chakra !`);
         await refetch();
       }
     } catch (error: any) {
@@ -115,7 +102,7 @@ export function ChakraModal({
     try {
       const { data: result } = await refillFiller();
       if (result.refillChakraWithFiller.success) {
-        Alert.alert('Chakra rechargé', result.refillChakraWithFiller.message);
+        Alert.alert('Chakra rechargé', `Tu as maintenant ${result.refillChakraWithFiller.newChakra} Chakra !`);
         await refetch();
       }
     } catch (error: any) {

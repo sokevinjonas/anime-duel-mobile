@@ -58,6 +58,7 @@ export function SoloGameScreen() {
 
   const scrollViewRef = useRef<ScrollView>(null);
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const sessionIdRef = useRef<string | null>(null);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [maxQuestions, setMaxQuestions] = useState(10);
@@ -84,7 +85,7 @@ export function SoloGameScreen() {
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
       // Si pas de session ou partie terminée, laisser quitter
-      if (!sessionId || gameOver) {
+      if (!sessionIdRef.current || gameOver) {
         return;
       }
 
@@ -106,7 +107,7 @@ export function SoloGameScreen() {
     });
 
     return unsubscribe;
-  }, [navigation, sessionId, gameOver]);
+  }, [navigation, gameOver]);
 
   useEffect(() => {
     handleStartGame();
@@ -128,7 +129,9 @@ export function SoloGameScreen() {
   const handleStartGame = async () => {
     try {
       const { data } = await startGame({ variables: { difficulty: 'EASY' } });
-      setSessionId(data.startSoloPlayerGuesses.sessionId);
+      const sid = data.startSoloPlayerGuesses.sessionId;
+      setSessionId(sid);
+      sessionIdRef.current = sid;
       setMaxQuestions(data.startSoloPlayerGuesses.maxQuestions);
       if (data.startSoloPlayerGuesses.firstQuestion) {
         setMessages([{ type: 'ai', text: data.startSoloPlayerGuesses.firstQuestion }]);

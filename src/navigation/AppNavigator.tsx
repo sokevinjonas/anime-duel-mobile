@@ -111,7 +111,7 @@ export function AppNavigator() {
         <Stack.Screen
           name="SoloGame"
           component={SoloGameScreen}
-          options={{ title: 'Match Solo', headerShown: false }}
+          options={{ title: 'Match Solo' }}
         />
         <Stack.Screen
           name="Catalog"
