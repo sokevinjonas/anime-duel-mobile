@@ -332,45 +332,43 @@ export function SoloGameScreen() {
 
       {/* Chat messages */}
       <ScrollView ref={scrollViewRef} style={styles.historyScroll} contentContainerStyle={styles.historyContent}>
-        {messages && messages.length > 0 && messages.map((msg, idx) => (
-          msg.text && msg.text.trim() ? (
+        {messages && messages.length > 0 && messages.filter(msg => msg.text && msg.text.trim()).map((msg, idx) => (
+          <View
+            key={idx}
+            style={[
+              styles.messageRow,
+              { justifyContent: msg.type === 'player' ? 'flex-end' : 'flex-start' },
+            ]}
+          >
+            {msg.type === 'ai' && aiAvatarUrl && (
+              <Image
+                source={{ uri: aiAvatarUrl }}
+                style={styles.avatar}
+              />
+            )}
             <View
-              key={idx}
               style={[
-                styles.messageRow,
-                { justifyContent: msg.type === 'player' ? 'flex-end' : 'flex-start' },
+                styles.messageBubble,
+                {
+                  backgroundColor: msg.type === 'player' ? colors.primary : colors.surface,
+                  borderWidth: msg.type === 'ai' ? 1 : 0,
+                  borderColor: msg.type === 'ai' ? colors.border : 'transparent',
+                },
               ]}
             >
-              {msg.type === 'ai' && aiAvatarUrl && (
-                <Image
-                  source={{ uri: aiAvatarUrl }}
-                  style={styles.avatar}
-                />
-              )}
-              <View
+              <Text
                 style={[
-                  styles.messageBubble,
+                  styles.messageText,
                   {
-                    backgroundColor: msg.type === 'player' ? colors.primary : colors.surface,
-                    borderWidth: msg.type === 'ai' ? 1 : 0,
-                    borderColor: msg.type === 'ai' ? colors.border : 'transparent',
+                    color: msg.type === 'player' ? '#FFF' : colors.text,
+                    fontFamily: fonts.body,
                   },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.messageText,
-                    {
-                      color: msg.type === 'player' ? '#FFF' : colors.text,
-                      fontFamily: fonts.body,
-                    },
-                  ]}
-                >
-                  {msg.text}
-                </Text>
-              </View>
+                {msg.text}
+              </Text>
             </View>
-          ) : null
+          </View>
         ))}
         {isWaitingForAI && (
           <View style={[styles.messageRow, { justifyContent: 'flex-start' }]}>
