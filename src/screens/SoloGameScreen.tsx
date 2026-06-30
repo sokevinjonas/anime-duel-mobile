@@ -12,6 +12,7 @@ import { fonts } from '../theme/fonts';
 import { Button3D } from '../components/ui/Button3D';
 import { SharinganModal } from '../components/SharinganModal';
 import { SharinganEyeIcon } from '../components/icons/SharinganEyeIcon';
+import { ConfirmModal } from '../components/ConfirmModal';
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -75,6 +76,7 @@ export function SoloGameScreen() {
   const [sharinganRemaining, setJokersRemaining] = useState(3);
   const [aiAvatarUrl, setAiAvatarUrl] = useState<string>('');
   const [showSharinganModal, setShowSharinganModal] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [typingDots, setTypingDots] = useState('...');
   const [isWaitingForAI, setIsWaitingForAI] = useState(false);
 
@@ -210,18 +212,24 @@ export function SoloGameScreen() {
   const handleConfirmGuess = () => {
     console.log('handleConfirmGuess called, guess:', guess);
     if (!guess.trim()) {
+      console.log('Guess is empty');
       Alert.alert('Attention', 'Entre le nom du personnage d\'abord');
       return;
     }
 
-    Alert.alert(
-      'Confirmer ta réponse',
-      `Tu crois que c'est:\n\n"${guess}"`,
-      [
-        { text: 'Non, corriger', style: 'cancel' },
-        { text: 'Oui, valider!', style: 'default', onPress: handleSubmitGuess }
-      ]
-    );
+    console.log('Opening confirm modal');
+    setShowConfirmModal(true);
+  };
+
+  const handleModalConfirm = () => {
+    console.log('Modal confirmed, submitting guess');
+    setShowConfirmModal(false);
+    handleSubmitGuess();
+  };
+
+  const handleModalCancel = () => {
+    console.log('Modal cancelled');
+    setShowConfirmModal(false);
   };
 
   const handleGoBack = useCallback(() => {
@@ -469,6 +477,17 @@ export function SoloGameScreen() {
         variant="eye"
         duration={2000}
         onHide={() => setShowSharinganModal(false)}
+      />
+
+      {/* Confirm Guess Modal */}
+      <ConfirmModal
+        visible={showConfirmModal}
+        title="Confirmer ta réponse"
+        message={`Tu crois que c'est:\n\n"${guess}"`}
+        confirmText="Oui, valider!"
+        cancelText="Non, corriger"
+        onConfirm={handleModalConfirm}
+        onCancel={handleModalCancel}
       />
     </View>
   );

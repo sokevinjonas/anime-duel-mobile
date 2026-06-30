@@ -10,34 +10,29 @@ import { Button3D } from '../components/ui/Button3D';
 
 const ARC_MISSIONS_QUERY = gql`
   query ArcMissions {
-    getMissionsForUser {
+    arcMissions {
       id
-      arc
-      type
-      targetValue
-      reward {
-        berry
-        chakra
-        sharingan
-      }
-      progress {
-        currentValue
-        claimed
-      }
+      arcNumber
+      missionType
+      target
+      label
+      rewardBerry
+      rewardChakra
+      rewardSharingan
+      currentValue
+      completed
+      claimed
     }
   }
 `;
 
 const CLAIM_MISSION_REWARD = gql`
-  mutation ClaimMissionReward($missionId: String!) {
-    claimMissionReward(missionId: $missionId) {
+  mutation ClaimArcReward($missionId: String!) {
+    claimArcReward(missionId: $missionId) {
       success
-      message
-      rewards {
-        berry
-        chakra
-        sharingan
-      }
+      berry
+      chakra
+      sharingan
     }
   }
 `;
@@ -49,7 +44,26 @@ export function MissionsScreen() {
 
   useAuthErrorHandler(error);
 
-  const missions = data?.getMissionsForUser || [];
+  const rawMissions = data?.arcMissions || [];
+
+  // Transform backend data to match frontend structure
+  const missions = rawMissions.map((m: any) => ({
+    id: m.id,
+    arc: m.arcNumber,
+    type: m.missionType,
+    targetValue: m.target,
+    label: m.label,
+    reward: {
+      berry: m.rewardBerry,
+      chakra: m.rewardChakra,
+      sharingan: m.rewardSharingan,
+    },
+    progress: {
+      currentValue: m.currentValue,
+      claimed: m.claimed,
+    },
+    completed: m.completed,
+  }));
 
   // Group missions by arc
   const missionsByArc = missions.reduce((acc: any, mission: any) => {
@@ -95,8 +109,9 @@ export function MissionsScreen() {
   const handleClaimReward = async (missionId: string) => {
     try {
       const { data: result } = await claimReward({ variables: { missionId } });
-      if (result.claimMissionReward.success) {
-        Alert.alert('Récompense obtenue !', result.claimMissionReward.message);
+      if (result?.claimArcReward?.success) {
+        const { berry, chakra, sharingan } = result.claimArcReward;
+        Alert.alert('Récompense obtenue !', `+${berry} Berry, +${chakra} Chakra, +${sharingan} Sharingan`);
         await refetch();
       }
     } catch (err: any) {
