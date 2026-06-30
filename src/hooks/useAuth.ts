@@ -37,8 +37,8 @@ const ME_QUERY = gql`
       email
       username
       avatar
-      coins
-      jokersCount
+      berry
+      sharinganCount
       currentLevel
       currentTier
       streakDays
