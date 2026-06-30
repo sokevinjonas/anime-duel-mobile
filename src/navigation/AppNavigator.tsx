@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ActivityIndicator, View, Text } from 'react-native';
+import { ActivityIndicator, View, Text, TouchableOpacity, Alert } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -111,7 +112,7 @@ export function AppNavigator() {
         <Stack.Screen
           name="SoloGame"
           component={SoloGameScreen}
-          options={{ title: 'Match Solo' }}
+          options={{ title: 'Match Solo', headerShown: false }}
         />
         <Stack.Screen
           name="Catalog"

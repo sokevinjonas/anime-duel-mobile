@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Modal, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -7,6 +7,7 @@ import { gql } from '@apollo/client';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
 import { Button3D } from './ui/Button3D';
+import { ResponseChakraModal } from './ResponseChakraModal';
 
 const REFILL_CHAKRA_BERRY = gql`
   mutation RefillChakraWithBerry {
@@ -54,6 +55,9 @@ export function ChakraModal({
   const { colors } = useTheme();
   const { data, loading, refetch } = useQuery(USER_CHAKRA_QUERY, { skip: !visible });
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [showResponse, setShowResponse] = useState(false);
+  const [responseSuccess, setResponseSuccess] = useState(false);
+  const [responseMessage, setResponseMessage] = useState('');
   const [refillBerry, { loading: refillingBerry }] = useMutation(REFILL_CHAKRA_BERRY);
   const [refillFiller, { loading: refillingFiller }] = useMutation(REFILL_CHAKRA_FILLER);
 
@@ -89,24 +93,59 @@ export function ChakraModal({
   const handleRefillBerry = async () => {
     try {
       const { data: result } = await refillBerry();
+      await refetch();
+
       if (result.refillChakraWithBerry.success) {
-        Alert.alert('Chakra rechargé', `Tu as maintenant ${result.refillChakraWithBerry.newChakra} Chakra !`);
-        await refetch();
+        setResponseSuccess(true);
+        setResponseMessage(`Tu as maintenant ${result.refillChakraWithBerry.newChakra} Chakra !`);
+      } else {
+        setResponseSuccess(false);
+        if (currentBerry < refillPriceBerry) {
+          setResponseMessage(`Pas assez de Berry. Il te faut ${refillPriceBerry} Berry pour recharger.`);
+        } else if (currentChakra >= maxChakra) {
+          setResponseMessage('Ton Chakra est déjà au maximum !');
+        } else {
+          setResponseMessage('Impossible de recharger le Chakra.');
+        }
       }
+      setShowResponse(true);
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Impossible de recharger le Chakra');
+      setResponseSuccess(false);
+      setResponseMessage(error.message || 'Une erreur est survenue');
+      setShowResponse(true);
     }
   };
 
   const handleRefillFiller = async () => {
     try {
       const { data: result } = await refillFiller();
+      await refetch();
+
       if (result.refillChakraWithFiller.success) {
-        Alert.alert('Chakra rechargé', `Tu as maintenant ${result.refillChakraWithFiller.newChakra} Chakra !`);
-        await refetch();
+        setResponseSuccess(true);
+        setResponseMessage(`Tu as maintenant ${result.refillChakraWithFiller.newChakra} Chakra !`);
+      } else {
+        setResponseSuccess(false);
+        if (fillersUsed >= 3) {
+          setResponseMessage('Tu as déjà utilisé tes 3 Fillers aujourd\'hui !');
+        } else if (currentChakra >= maxChakra) {
+          setResponseMessage('Ton Chakra est déjà au maximum !');
+        } else {
+          setResponseMessage('Impossible de recharger le Chakra.');
+        }
       }
+      setShowResponse(true);
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Impossible de recharger le Chakra');
+      setResponseSuccess(false);
+      setResponseMessage(error.message || 'Une erreur est survenue');
+      setShowResponse(true);
+    }
+  };
+
+  const handleCloseResponse = () => {
+    setShowResponse(false);
+    if (responseSuccess) {
+      onClose(); // Fermer le ChakraModal seulement si succès
     }
   };
 
@@ -265,6 +304,14 @@ export function ChakraModal({
           </View>
         </View>
       </View>
+
+      {/* Response Modal */}
+      <ResponseChakraModal
+        visible={showResponse}
+        success={responseSuccess}
+        message={responseMessage}
+        onClose={handleCloseResponse}
+      />
     </Modal>
   );
 }

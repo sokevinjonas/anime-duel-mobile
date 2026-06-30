@@ -81,34 +81,6 @@ export function SoloGameScreen() {
   useAuthErrorHandler(askError);
   useAuthErrorHandler(guessError);
 
-  // Intercepter le back button si partie en cours
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      // Si pas de session ou partie terminée, laisser quitter
-      if (!sessionIdRef.current || gameOver) {
-        return;
-      }
-
-      // Si partie en cours (sessionId existe et pas gameOver), demander confirmation
-      e.preventDefault();
-
-      Alert.alert(
-        'Quitter la partie ?',
-        'Tu vas perdre 1 Chakra si tu quittes maintenant. Es-tu sûr ?',
-        [
-          { text: 'Annuler', style: 'cancel', onPress: () => {} },
-          {
-            text: 'Quitter',
-            style: 'destructive',
-            onPress: () => navigation.dispatch(e.data.action),
-          },
-        ]
-      );
-    });
-
-    return unsubscribe;
-  }, [navigation, gameOver]);
-
   useEffect(() => {
     handleStartGame();
   }, []);
@@ -216,8 +188,24 @@ export function SoloGameScreen() {
   };
 
   const handleGoBack = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
+    // Si partie en cours, demander confirmation
+    if (sessionIdRef.current && !gameOver) {
+      Alert.alert(
+        'Quitter la partie ?',
+        'Tu vas perdre 1 Chakra si tu quittes maintenant. Es-tu sûr ?',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          {
+            text: 'Quitter',
+            style: 'destructive',
+            onPress: () => navigation.goBack(),
+          },
+        ]
+      );
+    } else {
+      navigation.goBack();
+    }
+  }, [navigation, gameOver]);
 
   if (starting) {
     return (
