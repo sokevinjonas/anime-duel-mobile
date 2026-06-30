@@ -76,8 +76,14 @@ export function HomeScreen() {
   const maxLevel = getMaxLevel(currentTier + 1); // Afficher jusqu'au palier suivant
 
   const handlePlay = () => {
-    // Toujours afficher le modal d'énergie au clic sur JOUER
-    setShowEnergyModal(true);
+    // Si pas de Chakra, afficher le modal pour refill
+    // Sinon, lancer directement le jeu
+    if (currentChakra <= 0) {
+      setShowEnergyModal(true);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      navigation.navigate('SoloGame');
+    }
   };
 
   const handlePlayConfirmed = () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image, Animated } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image, Animated, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
@@ -79,6 +79,34 @@ export function SoloGameScreen() {
   useAuthErrorHandler(startError);
   useAuthErrorHandler(askError);
   useAuthErrorHandler(guessError);
+
+  // Intercepter le back button si partie en cours
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      // Si la partie est terminée, laisser quitter
+      if (gameOver) {
+        return;
+      }
+
+      // Si partie en cours, demander confirmation
+      e.preventDefault();
+
+      Alert.alert(
+        'Quitter la partie ?',
+        'Tu vas perdre 1 Chakra si tu quittes maintenant. Es-tu sûr ?',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          {
+            text: 'Quitter',
+            style: 'destructive',
+            onPress: () => navigation.dispatch(e.data.action),
+          },
+        ]
+      );
+    });
+
+    return unsubscribe;
+  }, [navigation, gameOver]);
 
   useEffect(() => {
     handleStartGame();
