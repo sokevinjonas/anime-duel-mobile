@@ -155,7 +155,7 @@ export function HomeScreen() {
             currentLevel={currentLevel}
             maxLevel={maxLevel}
             onPlayLevel={handlePlay}
-            energyAvailable={currentEnergy > 0}
+            energyAvailable={currentChakra > 0}
           />
         </View>
 
