@@ -83,19 +83,19 @@ export function SoloGameScreen() {
   // Intercepter le back button si partie en cours
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      // Si la partie est terminée, laisser quitter
-      if (gameOver) {
+      // Si pas de session ou partie terminée, laisser quitter
+      if (!sessionId || gameOver) {
         return;
       }
 
-      // Si partie en cours, demander confirmation
+      // Si partie en cours (sessionId existe et pas gameOver), demander confirmation
       e.preventDefault();
 
       Alert.alert(
         'Quitter la partie ?',
         'Tu vas perdre 1 Chakra si tu quittes maintenant. Es-tu sûr ?',
         [
-          { text: 'Annuler', style: 'cancel' },
+          { text: 'Annuler', style: 'cancel', onPress: () => {} },
           {
             text: 'Quitter',
             style: 'destructive',
@@ -106,7 +106,7 @@ export function SoloGameScreen() {
     });
 
     return unsubscribe;
-  }, [navigation, gameOver]);
+  }, [navigation, sessionId, gameOver]);
 
   useEffect(() => {
     handleStartGame();
