@@ -44,13 +44,11 @@ const USER_CHAKRA_QUERY = gql`
 interface ChakraModalProps {
   visible: boolean;
   onClose: () => void;
-  onPlay?: () => void;
 }
 
 export function ChakraModal({
   visible,
   onClose,
-  onPlay,
 }: ChakraModalProps) {
   const { colors } = useTheme();
   const { data, loading, refetch } = useQuery(USER_CHAKRA_QUERY, { skip: !visible });
@@ -101,7 +99,8 @@ export function ChakraModal({
       } else {
         setResponseSuccess(false);
         if (currentBerry < refillPriceBerry) {
-          setResponseMessage(`Pas assez de Berry. Il te faut ${refillPriceBerry} Berry pour recharger.`);
+          const manquant = refillPriceBerry - currentBerry;
+          setResponseMessage(`Pas assez de Berry !\n\nTu as : ${currentBerry} Berry\nCoût : ${refillPriceBerry} Berry\nManquant : ${manquant} Berry`);
         } else if (currentChakra >= maxChakra) {
           setResponseMessage('Ton Chakra est déjà au maximum !');
         } else {
@@ -287,15 +286,6 @@ export function ChakraModal({
 
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
-            {onPlay && currentChakra > 0 && (
-              <Button3D
-                title="JOUER"
-                color={colors.primary}
-                darkColor={colors.primaryDark}
-                onPress={onPlay}
-                size="large"
-              />
-            )}
             <TouchableOpacity style={[styles.closeBtn, { backgroundColor: colors.border }]} onPress={onClose}>
               <Text style={[styles.closeBtnText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                 Fermer

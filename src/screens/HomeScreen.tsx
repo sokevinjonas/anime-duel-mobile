@@ -196,7 +196,6 @@ export function HomeScreen() {
       <ChakraModal
         visible={showEnergyModal}
         onClose={handleEnergyModalClose}
-        onPlay={handlePlayConfirmed}
       />
     </>
   );
