@@ -107,8 +107,8 @@ export function ShopScreen() {
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View style={styles.header}>
-        <MaterialIcons name="store" size={32} color={colors.primary} />
-        <Text style={[styles.title, { color: colors.text, fontFamily: fonts.heading }]}>Boutique</Text>
+        <Text style={styles.ramenEmoji}>🍜</Text>
+        <Text style={[styles.title, { color: colors.text, fontFamily: fonts.heading }]}>Ichiraku Ramen</Text>
       </View>
 
       {/* Balance Card */}
@@ -237,6 +237,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { padding: 20, paddingBottom: 100 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 24 },
+  ramenEmoji: { fontSize: 32 },
   title: { fontSize: 24 },
   balanceCard: {
     borderRadius: 16,

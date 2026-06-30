@@ -191,9 +191,9 @@ export function ProfileScreen() {
             onPress={() => navigation.navigate('Shop' as any)}
             activeOpacity={0.7}
           >
-            <Text style={styles.shortcutEmoji}>🛒</Text>
+            <Text style={styles.shortcutEmoji}>🍜</Text>
             <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
-              Boutique
+              Ichiraku Ramen
             </Text>
           </TouchableOpacity>
 

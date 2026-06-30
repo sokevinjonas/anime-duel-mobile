@@ -82,7 +82,7 @@ export function ResponseChakraModal({
                 onPress={onGoToShop}
               >
                 <MaterialIcons name="store" size={18} color="#000" />
-                <Text style={[styles.btnText, { color: '#000', fontFamily: fonts.bodyBold }]}>Boutique</Text>
+                <Text style={[styles.btnText, { color: '#000', fontFamily: fonts.bodyBold }]}>Ichiraku Ramen</Text>
               </TouchableOpacity>
             </View>
           ) : (

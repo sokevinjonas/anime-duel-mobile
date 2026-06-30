@@ -122,7 +122,7 @@ export function AppNavigator() {
         <Stack.Screen
           name="Shop"
           component={ShopScreen}
-          options={{ title: 'Boutique' }}
+          options={{ title: 'Ichiraku Ramen' }}
         />
         <Stack.Screen
           name="Missions"

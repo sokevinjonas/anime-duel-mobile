@@ -282,8 +282,8 @@ export function ChakraModal({
               ) : (
                 <Button3D
                   title="ACHETER BERRY"
-                  color={colors.primary}
-                  darkColor={colors.primaryDark}
+                  color={colors.warning}
+                  darkColor={colors.warningDark}
                   onPress={onShowResponse.bind(null, {
                     success: false,
                     errorType: 'insufficient_berry' as const,
