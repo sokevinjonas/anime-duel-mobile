@@ -14,6 +14,7 @@ import { Button3D } from '../components/ui/Button3D';
 import { ProgressionMap } from '../components/progression/ProgressionMap';
 import { EnergyBar } from '../components/ui/EnergyBar';
 import { ChakraModal } from '../components/ChakraModal';
+import { ResponseChakraModal } from '../components/ResponseChakraModal';
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
 import { useRefetchUser } from '../hooks/useRefetchUser';
 import { WelcomeGiftModal } from '../components/WelcomeGiftModal';
@@ -48,6 +49,14 @@ export function HomeScreen() {
   const [markGiftViewed] = useMutation<any>(MARK_GIFT_VIEWED);
   const [showGiftModal, setShowGiftModal] = useState(false);
   const [showEnergyModal, setShowEnergyModal] = useState(false);
+  const [showResponseModal, setShowResponseModal] = useState(false);
+  const [responseData, setResponseData] = useState<{
+    success: boolean;
+    errorType?: 'insufficient_berry' | 'max_chakra' | 'max_fillers' | 'other';
+    currentBerry?: number;
+    cost?: number;
+    newChakra?: number;
+  }>({ success: false });
 
   // Check for new user gift on mount
   useEffect(() => {
@@ -102,6 +111,23 @@ export function HomeScreen() {
   const handleEnergyModalClose = async () => {
     setShowEnergyModal(false);
     await refetch();
+  };
+
+  const handleShowResponse = (data: typeof responseData) => {
+    setResponseData(data);
+    setShowResponseModal(true);
+    if (data.success) {
+      setShowEnergyModal(false);
+    }
+  };
+
+  const handleCloseResponse = () => {
+    setShowResponseModal(false);
+  };
+
+  const handleGoToShop = () => {
+    setShowResponseModal(false);
+    navigation.navigate('Shop');
   };
 
   if (loading) {
@@ -196,6 +222,18 @@ export function HomeScreen() {
       <ChakraModal
         visible={showEnergyModal}
         onClose={handleEnergyModalClose}
+        onShowResponse={handleShowResponse}
+      />
+
+      <ResponseChakraModal
+        visible={showResponseModal}
+        success={responseData.success}
+        errorType={responseData.errorType}
+        currentBerry={responseData.currentBerry}
+        cost={responseData.cost}
+        newChakra={responseData.newChakra}
+        onClose={handleCloseResponse}
+        onGoToShop={handleGoToShop}
       />
     </>
   );

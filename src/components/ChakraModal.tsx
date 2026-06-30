@@ -4,13 +4,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { gql } from '@apollo/client';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
 import { Button3D } from './ui/Button3D';
-import { ResponseChakraModal } from './ResponseChakraModal';
-import { RootStackParamList } from '../navigation/AppNavigator';
 
 const REFILL_CHAKRA_BERRY = gql`
   mutation RefillChakraWithBerry {
@@ -40,6 +36,7 @@ const USER_CHAKRA_QUERY = gql`
       maxChakra
       berry
       fillerUsedToday
+      refillCountToday
     }
   }
 `;
@@ -47,24 +44,23 @@ const USER_CHAKRA_QUERY = gql`
 interface ChakraModalProps {
   visible: boolean;
   onClose: () => void;
-}
-
-export function ChakraModal({
-  visible,
-  onClose,
-}: ChakraModalProps) {
-  const { colors } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { data, loading, refetch } = useQuery(USER_CHAKRA_QUERY, { skip: !visible });
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const [showResponse, setShowResponse] = useState(false);
-  const [responseData, setResponseData] = useState<{
+  onShowResponse: (data: {
     success: boolean;
     errorType?: 'insufficient_berry' | 'max_chakra' | 'max_fillers' | 'other';
     currentBerry?: number;
     cost?: number;
     newChakra?: number;
-  }>({ success: false });
+  }) => void;
+}
+
+export function ChakraModal({
+  visible,
+  onClose,
+  onShowResponse,
+}: ChakraModalProps) {
+  const { colors } = useTheme();
+  const { data, loading, refetch } = useQuery(USER_CHAKRA_QUERY, { skip: !visible });
+  const [timeRemaining, setTimeRemaining] = useState(0);
   const [refillBerry, { loading: refillingBerry }] = useMutation(REFILL_CHAKRA_BERRY);
   const [refillFiller, { loading: refillingFiller }] = useMutation(REFILL_CHAKRA_FILLER);
 
@@ -73,9 +69,10 @@ export function ChakraModal({
   const maxChakra = user?.maxChakra || 8;
   const currentBerry = user?.berry || 0;
   const fillersUsed = user?.fillerUsedToday || 0;
+  const refillCountToday = user?.refillCountToday || 0;
 
   // Calculate refill price (doubling pattern: 30, 60, 120, 240...)
-  const refillPriceBerry = 30 * Math.pow(2, fillersUsed);
+  const refillPriceBerry = 30 * Math.pow(2, refillCountToday);
   const canUseBerry = currentBerry >= refillPriceBerry;
   const canUseFiller = fillersUsed < 3;
 
@@ -98,33 +95,54 @@ export function ChakraModal({
   };
 
   const handleRefillBerry = async () => {
+    // Vérifier AVANT l'appel API pour avoir les bonnes valeurs
+    const berryBeforeCall = currentBerry;
+    const chakraBeforeCall = currentChakra;
+    const priceBeforeCall = refillPriceBerry;
+
+    console.log('🔍 Refill Berry attempt:', {
+      berry: berryBeforeCall,
+      chakra: chakraBeforeCall,
+      maxChakra,
+      price: priceBeforeCall,
+      hasEnough: berryBeforeCall >= priceBeforeCall,
+      isFull: chakraBeforeCall >= maxChakra,
+    });
+
     try {
       const { data: result } = await refillBerry();
+      console.log('📦 API Response:', result.refillChakraWithBerry);
       await refetch();
 
+      let responseData;
       if (result.refillChakraWithBerry.success) {
-        setResponseData({
+        responseData = {
           success: true,
           newChakra: result.refillChakraWithBerry.newChakra,
-        });
+        };
       } else {
-        if (currentBerry < refillPriceBerry) {
-          setResponseData({
+        // Échec : déterminer pourquoi avec les valeurs AVANT l'appel
+        if (berryBeforeCall < priceBeforeCall) {
+          console.log('❌ Insufficient berry detected');
+          responseData = {
             success: false,
-            errorType: 'insufficient_berry',
-            currentBerry,
-            cost: refillPriceBerry,
-          });
-        } else if (currentChakra >= maxChakra) {
-          setResponseData({ success: false, errorType: 'max_chakra' });
+            errorType: 'insufficient_berry' as const,
+            currentBerry: berryBeforeCall,
+            cost: priceBeforeCall,
+          };
+          onClose(); // Fermer le ChakraModal
+        } else if (chakraBeforeCall >= maxChakra) {
+          console.log('❌ Max chakra detected');
+          responseData = { success: false, errorType: 'max_chakra' as const };
         } else {
-          setResponseData({ success: false, errorType: 'other' });
+          console.log('❌ Other error detected');
+          responseData = { success: false, errorType: 'other' as const };
         }
       }
-      setShowResponse(true);
+      onShowResponse(responseData);
     } catch (error: any) {
-      setResponseData({ success: false, errorType: 'other' });
-      setShowResponse(true);
+      console.log('❌ Exception:', error);
+      onShowResponse({ success: false, errorType: 'other' });
     }
   };
 
@@ -133,38 +151,25 @@ export function ChakraModal({
       const { data: result } = await refillFiller();
       await refetch();
 
+      let responseData;
       if (result.refillChakraWithFiller.success) {
-        setResponseData({
+        responseData = {
           success: true,
           newChakra: result.refillChakraWithFiller.newChakra,
-        });
+        };
       } else {
         if (fillersUsed >= 3) {
-          setResponseData({ success: false, errorType: 'max_fillers' });
+          responseData = { success: false, errorType: 'max_fillers' as const };
         } else if (currentChakra >= maxChakra) {
-          setResponseData({ success: false, errorType: 'max_chakra' });
+          responseData = { success: false, errorType: 'max_chakra' as const };
         } else {
-          setResponseData({ success: false, errorType: 'other' });
+          responseData = { success: false, errorType: 'other' as const };
         }
       }
-      setShowResponse(true);
+      onShowResponse(responseData);
     } catch (error: any) {
-      setResponseData({ success: false, errorType: 'other' });
-      setShowResponse(true);
+      onShowResponse({ success: false, errorType: 'other' });
     }
-  };
-
-  const handleCloseResponse = () => {
-    setShowResponse(false);
-    if (responseData.success || responseData.errorType === 'insufficient_berry') {
-      onClose(); // Fermer le ChakraModal si succès OU pas assez de Berry
-    }
-  };
-
-  const handleGoToShop = () => {
-    setShowResponse(false);
-    onClose();
-    navigation.navigate('Shop');
   };
 
   return (
@@ -265,14 +270,29 @@ export function ChakraModal({
                 </Text>
               </View>
 
-              <Button3D
-                title={refillingBerry ? 'RECHARGE...' : 'RECHARGER'}
-                color={canUseBerry ? colors.warning : colors.border}
-                darkColor={canUseBerry ? colors.warningDark : colors.border}
-                onPress={handleRefillBerry}
-                disabled={!canUseBerry || refillingBerry}
-                size="medium"
-              />
+              {canUseBerry ? (
+                <Button3D
+                  title={refillingBerry ? 'RECHARGE...' : 'RECHARGER'}
+                  color={colors.warning}
+                  darkColor={colors.warningDark}
+                  onPress={handleRefillBerry}
+                  disabled={refillingBerry}
+                  size="medium"
+                />
+              ) : (
+                <Button3D
+                  title="ACHETER BERRY"
+                  color={colors.primary}
+                  darkColor={colors.primaryDark}
+                  onPress={onShowResponse.bind(null, {
+                    success: false,
+                    errorType: 'insufficient_berry' as const,
+                    currentBerry,
+                    cost: refillPriceBerry,
+                  })}
+                  size="medium"
+                />
+              )}
             </View>
 
             {/* Refill with Filler */}
@@ -313,18 +333,6 @@ export function ChakraModal({
           </View>
         </View>
       </View>
-
-      {/* Response Modal */}
-      <ResponseChakraModal
-        visible={showResponse}
-        success={responseData.success}
-        errorType={responseData.errorType}
-        currentBerry={responseData.currentBerry}
-        cost={responseData.cost}
-        newChakra={responseData.newChakra}
-        onClose={handleCloseResponse}
-        onGoToShop={handleGoToShop}
-      />
     </Modal>
   );
 }
