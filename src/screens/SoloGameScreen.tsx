@@ -154,9 +154,9 @@ export function SoloGameScreen() {
 
       const { data } = await useSharingan({ variables: { sessionId } });
 
-      if (data?.soloUseJoker?.hint) {
-        setMessages(prev => [...prev, { type: 'ai', text: `💡 Indice: ${data.soloUseJoker.hint}` }]);
-        setJokersRemaining(data.soloUseJoker.sharinganRemaining);
+      if (data?.soloUseSharingan?.hint) {
+        setMessages(prev => [...prev, { type: 'ai', text: `💡 Indice: ${data.soloUseSharingan.hint}` }]);
+        setJokersRemaining(data.soloUseSharingan.sharinganRemaining);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     } catch (error) {
