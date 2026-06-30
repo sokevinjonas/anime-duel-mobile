@@ -284,43 +284,45 @@ export function SoloGameScreen() {
 
       {/* Chat messages */}
       <ScrollView ref={scrollViewRef} style={styles.historyScroll} contentContainerStyle={styles.historyContent}>
-        {messages.map((msg, idx) => (
-          <View
-            key={idx}
-            style={[
-              styles.messageRow,
-              { justifyContent: msg.type === 'player' ? 'flex-end' : 'flex-start' },
-            ]}
-          >
-            {msg.type === 'ai' && aiAvatarUrl && (
-              <Image
-                source={{ uri: aiAvatarUrl }}
-                style={styles.avatar}
-              />
-            )}
+        {messages && messages.length > 0 && messages.map((msg, idx) => (
+          msg.text && msg.text.trim() ? (
             <View
+              key={idx}
               style={[
-                styles.messageBubble,
-                {
-                  backgroundColor: msg.type === 'player' ? colors.primary : colors.surface,
-                  borderWidth: msg.type === 'ai' ? 1 : 0,
-                  borderColor: msg.type === 'ai' ? colors.border : 'transparent',
-                },
+                styles.messageRow,
+                { justifyContent: msg.type === 'player' ? 'flex-end' : 'flex-start' },
               ]}
             >
-              <Text
+              {msg.type === 'ai' && aiAvatarUrl && (
+                <Image
+                  source={{ uri: aiAvatarUrl }}
+                  style={styles.avatar}
+                />
+              )}
+              <View
                 style={[
-                  styles.messageText,
+                  styles.messageBubble,
                   {
-                    color: msg.type === 'player' ? '#FFF' : colors.text,
-                    fontFamily: fonts.body,
+                    backgroundColor: msg.type === 'player' ? colors.primary : colors.surface,
+                    borderWidth: msg.type === 'ai' ? 1 : 0,
+                    borderColor: msg.type === 'ai' ? colors.border : 'transparent',
                   },
                 ]}
               >
-                {msg.text}
-              </Text>
+                <Text
+                  style={[
+                    styles.messageText,
+                    {
+                      color: msg.type === 'player' ? '#FFF' : colors.text,
+                      fontFamily: fonts.body,
+                    },
+                  ]}
+                >
+                  {msg.text}
+                </Text>
+              </View>
             </View>
-          </View>
+          ) : null
         ))}
       </ScrollView>
 
