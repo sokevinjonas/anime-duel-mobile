@@ -174,7 +174,7 @@ export function WelcomeGiftModal({ visible, onClose }: WelcomeGiftModalProps) {
                           <Text style={styles.rewardEmoji}>3</Text>
                         </View>
                         <Text style={[styles.rewardValue, { color: colors.primary, fontFamily: fonts.heading }]}>
-                          Jokers
+                          Sharingan
                         </Text>
                       </LinearGradient>
                     </View>
@@ -182,7 +182,7 @@ export function WelcomeGiftModal({ visible, onClose }: WelcomeGiftModalProps) {
 
                   <View style={[styles.infoBox, { backgroundColor: colors.primary + '12', borderColor: colors.primary }]}>
                     <Text style={[styles.infoText, { color: '#ffffff', fontFamily: fonts.body }]}>
-                      Les pièces te permettent de débloquer de nouveaux paliers. Les jokers t'aident à remporter tes matchs.
+                      Les Berry te permettent de débloquer de nouveaux paliers. Les Sharingan t'aident à remporter tes matchs.
                     </Text>
                   </View>
 

@@ -14,6 +14,8 @@ import { ShopScreen } from '../screens/ShopScreen';
 import { MissionsScreen } from '../screens/MissionsScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { HistoryScreen } from '../screens/HistoryScreen';
+import { WheelScreen } from '../screens/WheelScreen';
+import { EventsScreen } from '../screens/EventsScreen';
 import { getAccessToken } from '../services/auth';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
@@ -28,6 +30,8 @@ export type RootStackParamList = {
   Shop: undefined;
   Missions: undefined;
   History: undefined;
+  Wheel: undefined;
+  Events: undefined;
 };
 
 export type TabParamList = {
@@ -128,6 +132,16 @@ export function AppNavigator() {
           name="History"
           component={HistoryScreen}
           options={{ title: 'Historique' }}
+        />
+        <Stack.Screen
+          name="Wheel"
+          component={WheelScreen}
+          options={{ title: 'Roue du Destin' }}
+        />
+        <Stack.Screen
+          name="Events"
+          component={EventsScreen}
+          options={{ title: 'Événement Hebdo' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
