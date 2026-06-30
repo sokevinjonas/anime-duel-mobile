@@ -75,7 +75,7 @@ export function SoloGameScreen() {
   const [sharinganRemaining, setJokersRemaining] = useState(3);
   const [aiAvatarUrl, setAiAvatarUrl] = useState<string>('');
   const [showSharinganModal, setShowSharinganModal] = useState(false);
-  const [typingDots, setTypingDots] = useState('.');
+  const [typingDots, setTypingDots] = useState('...');
   const [isWaitingForAI, setIsWaitingForAI] = useState(false);
 
   const [startGame, { loading: starting, error: startError }] = useMutation(START_SOLO_GAME);
@@ -163,11 +163,14 @@ export function SoloGameScreen() {
       const { data } = await useSharingan({ variables: { sessionId } });
 
       if (data?.soloUseSharingan?.hint) {
+        setJokersRemaining(data.soloUseSharingan.sharinganRemaining);
         setTimeout(() => {
           setMessages(prev => [...prev, { type: 'ai', text: `💡 Indice: ${data.soloUseSharingan.hint}` }]);
-          setJokersRemaining(data.soloUseSharingan.sharinganRemaining);
+          setShowSharinganModal(false);
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         }, 2000);
+      } else {
+        setShowSharinganModal(false);
       }
     } catch (error) {
       console.error('Error using joker:', error);
@@ -176,13 +179,18 @@ export function SoloGameScreen() {
   };
 
   const handleSubmitGuess = async () => {
-    if (!guess.trim() || !sessionId) return;
+    if (!guess.trim() || !sessionId) {
+      console.log('Submit blocked - guess:', guess.trim(), 'sessionId:', sessionId);
+      return;
+    }
 
+    console.log('Submitting guess:', guess);
     try {
       const { data } = await submitGuess({
         variables: { sessionId, guess },
       });
 
+      console.log('Submit result:', data);
       setGameOver(true);
       setWon(data.soloSubmitGuess.correct);
       // Pas de révélation du personnage dans les paliers
@@ -195,10 +203,17 @@ export function SoloGameScreen() {
       }
     } catch (error) {
       console.error('Error submitting guess:', error);
+      Alert.alert('Erreur', 'Impossible de valider ta réponse. Réessaye.');
     }
   };
 
   const handleConfirmGuess = () => {
+    console.log('handleConfirmGuess called, guess:', guess);
+    if (!guess.trim()) {
+      Alert.alert('Attention', 'Entre le nom du personnage d\'abord');
+      return;
+    }
+
     Alert.alert(
       'Confirmer ta réponse',
       `Tu crois que c'est:\n\n"${guess}"`,
