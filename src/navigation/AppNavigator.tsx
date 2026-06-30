@@ -132,7 +132,7 @@ export function AppNavigator() {
         <Stack.Screen
           name="History"
           component={HistoryScreen}
-          options={{ title: 'Historique' }}
+          options={{ title: '📜 Parchemin' }}
         />
         <Stack.Screen
           name="Wheel"

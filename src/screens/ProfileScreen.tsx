@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { gql } from '@apollo/client';
@@ -202,10 +203,122 @@ export function ProfileScreen() {
             onPress={() => navigation.navigate('Leaderboard' as any)}
             activeOpacity={0.7}
           >
-            <Text style={styles.shortcutEmoji}>🏅</Text>
+            <Text style={styles.shortcutEmoji}>🎖️</Text>
             <Text style={[styles.shortcutText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
-              Classement
+              Hall des Kage
             </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Paramètres & Infos */}
+        <SectionTitle>Paramètres & Infos</SectionTitle>
+        <View style={styles.settingsSection}>
+          <TouchableOpacity
+            style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <Text style={[styles.settingIcon]}>👤</Text>
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                  Mon Profil
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+                  Modifier mon pseudo et avatar
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <Text style={[styles.settingIcon]}>📊</Text>
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                  Mes Statistiques
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+                  Winrate, temps de jeu
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <Text style={[styles.settingIcon]}>🏆</Text>
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                  Mes Succès
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+                  Achievements et trophées
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <Text style={[styles.settingIcon]}>⚙️</Text>
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                  Paramètres
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+                  Notifications, langue, son
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <Text style={[styles.settingIcon]}>❓</Text>
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                  Aide & Support
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+                  FAQ et tutoriel
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.settingItem, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1 }]}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingContent}>
+              <Text style={[styles.settingIcon]}>ℹ️</Text>
+              <View style={styles.settingInfo}>
+                <Text style={[styles.settingTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                  À propos
+                </Text>
+                <Text style={[styles.settingDesc, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+                  Crédits et mentions légales
+                </Text>
+              </View>
+            </View>
+            <MaterialIcons name="arrow-forward" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -383,6 +496,36 @@ const styles = StyleSheet.create({
   },
   shortcutText: {
     fontSize: 13,
+  },
+  settingsSection: {
+    gap: 12,
+  },
+  settingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    gap: 14,
+  },
+  settingContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  settingIcon: {
+    fontSize: 24,
+  },
+  settingInfo: {
+    flex: 1,
+  },
+  settingTitle: {
+    fontSize: 15,
+    marginBottom: 2,
+  },
+  settingDesc: {
+    fontSize: 12,
   },
   logoutBtn: {
     marginTop: 32,

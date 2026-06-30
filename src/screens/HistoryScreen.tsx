@@ -69,7 +69,7 @@ export function HistoryScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text, fontFamily: fonts.heading }]}>
-          Historique
+          📜 Parchemin
         </Text>
         <View style={[styles.totalBadge, { backgroundColor: colors.primary + '15' }]}>
           <Text style={[styles.totalText, { color: colors.primary, fontFamily: fonts.bodyBold }]}>
