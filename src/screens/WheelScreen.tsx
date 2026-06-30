@@ -6,6 +6,7 @@ import { gql } from '@apollo/client';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
+import { SharinganEyeIcon } from '../components/icons/SharinganEyeIcon';
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
 
 const WHEEL_STATUS_QUERY = gql`
@@ -36,7 +37,7 @@ const WHEEL_REWARDS = [
   { type: 'berry', amount: 50, chance: '15%', color: '#FFD93D', icon: '🫐' },
   { type: 'chakra', amount: 1, chance: '10%', color: '#6BCFFF', icon: '⚡' },
   { type: 'berry', amount: 200, chance: '7%', color: '#FFD93D', icon: '🫐' },
-  { type: 'sharingan', amount: 1, chance: '3%', color: '#FF6B6B', icon: '👁️' },
+  { type: 'sharingan', amount: 1, chance: '3%', color: '#FF6B6B', icon: 'sharingan-eye' },
 ];
 
 export function WheelScreen() {
@@ -167,7 +168,11 @@ export function WheelScreen() {
               key={index}
               style={[styles.rewardItem, { backgroundColor: colors.surface, borderColor: colors.border }]}
             >
-              <Text style={styles.rewardIcon}>{reward.icon}</Text>
+              {reward.icon === 'sharingan-eye' ? (
+                <SharinganEyeIcon size={28} color={colors.error} />
+              ) : (
+                <Text style={styles.rewardIcon}>{reward.icon}</Text>
+              )}
               <Text style={[styles.rewardAmount, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                 {reward.amount}
               </Text>

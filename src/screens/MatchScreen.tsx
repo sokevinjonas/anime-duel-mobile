@@ -13,6 +13,7 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { CharacterPicker } from '../components/CharacterPicker';
+import { SharinganEyeIcon } from '../components/icons/SharinganEyeIcon';
 import { getSocket, connectSocket } from '../services/socket';
 import { getAccessToken } from '../services/auth';
 import { useTheme } from '../theme/ThemeContext';
@@ -270,8 +271,9 @@ export function MatchScreen() {
               </TouchableOpacity>
             </View>
             <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.sharinganBtn} onPress={handleUseSharingan}>
-                <Text style={styles.sharinganBtnText}>👁️ Sharingan</Text>
+              <TouchableOpacity style={[styles.sharinganBtn, { backgroundColor: colors.warning }]} onPress={handleUseSharingan}>
+                <SharinganEyeIcon size={18} color={colors.error} />
+                <Text style={styles.sharinganBtnText}>Sharingan</Text>
               </TouchableOpacity>
               <View style={styles.guessRow}>
                 <TextInput
@@ -370,13 +372,15 @@ const styles = StyleSheet.create({
   sendBtnText: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
   actionButtons: { flexDirection: 'row', gap: 8 },
   sharinganBtn: {
-    backgroundColor: '#8e44ad',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 16,
     justifyContent: 'center',
   },
-  sharinganBtnText: { color: '#fff', fontWeight: '600' },
+  sharinganBtnText: { color: '#000', fontWeight: '600' },
   guessRow: { flex: 1, flexDirection: 'row', gap: 8 },
   guessInput: {
     flex: 1,

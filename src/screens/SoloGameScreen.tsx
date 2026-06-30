@@ -11,6 +11,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
 import { Button3D } from '../components/ui/Button3D';
 import { SharinganModal } from '../components/SharinganModal';
+import { SharinganEyeIcon } from '../components/icons/SharinganEyeIcon';
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -272,7 +273,10 @@ export function SoloGameScreen() {
               onPress={handleUseJoker}
               disabled={sharinganRemaining <= 0 || sharinganLoading}
             >
-              <Text style={styles.sharinganText}>👁️ {sharinganRemaining}</Text>
+              <SharinganEyeIcon size={20} color={sharinganRemaining > 0 ? colors.error : colors.textMuted} />
+              <Text style={[styles.sharinganText, { color: sharinganRemaining > 0 ? '#000' : colors.textMuted }]}>
+                {sharinganRemaining}
+              </Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
@@ -390,6 +394,9 @@ const styles = StyleSheet.create({
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   questionsCount: { fontSize: 16 },
   sharinganBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
