@@ -212,18 +212,33 @@ export function SoloGameScreen() {
     }
   };
 
+  const handleConfirmGuess = () => {
+    Alert.alert(
+      'Confirmer ta réponse',
+      `Tu crois que c'est:\n\n"${guess}"`,
+      [
+        { text: 'Non, corriger', style: 'cancel' },
+        { text: 'Oui, valider!', style: 'default', onPress: handleSubmitGuess }
+      ]
+    );
+  };
+
   const handleGoBack = useCallback(() => {
     // Si partie en cours, demander confirmation
     if (sessionIdRef.current && !gameOver) {
       Alert.alert(
         'Quitter la partie ?',
-        'Tu vas perdre 1 Chakra si tu quittes maintenant. Es-tu sûr ?',
+        'Ta partie est sauvegardée. Tu pourras continuer plus tard. Es-tu sûr ?',
         [
           { text: 'Annuler', style: 'cancel' },
           {
             text: 'Quitter',
             style: 'destructive',
-            onPress: () => navigation.goBack(),
+            onPress: () => {
+              Alert.alert('Partie sauvegardée', 'Reviens quand tu veux!', [
+                { text: 'OK', onPress: () => navigation.goBack() }
+              ]);
+            },
           },
         ]
       );
@@ -388,7 +403,7 @@ export function SoloGameScreen() {
             title="VALIDER"
             color={colors.orange}
             darkColor={colors.orangeDark}
-            onPress={handleSubmitGuess}
+            onPress={handleConfirmGuess}
             size="small"
             disabled={guessing || !guess.trim()}
           />

@@ -47,7 +47,7 @@ export function MatchScreen() {
   const [isMyTurn, setIsMyTurn] = useState(false);
   const [showCharPicker, setShowCharPicker] = useState(false);
   const [selectedChar, setSelectedChar] = useState<string | null>(null);
-  const [result, setResult] = useState<{ winnerId: string | null; reason: string } | null>(null);
+  const [result, setResult] = useState<{ winnerId: string | null; reason: string; berryReward?: number; sharinganReward?: number } | null>(null);
   const [timerSeconds, setTimerSeconds] = useState(60);
   const [myUserId] = useState(user?.id || '');
   const [waitingForResponse, setWaitingForResponse] = useState(false);
@@ -155,6 +155,29 @@ export function MatchScreen() {
     return () => clearInterval(interval);
   }, [phase]);
 
+  const handleGoBack = useCallback(() => {
+    if (phase === 'playing') {
+      Alert.alert(
+        'Quitter le match ?',
+        'Ton adversaire remportera la victoire. Es-tu sûr ?',
+        [
+          { text: 'Continuer', style: 'cancel' },
+          {
+            text: 'Quitter',
+            style: 'destructive',
+            onPress: () => {
+              const socket = getSocket();
+              socket.emit('match:forfeit');
+              navigation.goBack();
+            },
+          },
+        ]
+      );
+    } else {
+      navigation.goBack();
+    }
+  }, [phase, navigation]);
+
   const handleCharSelect = (char: { id: string; name: string }) => {
     setSelectedChar(char.name);
     setShowCharPicker(false);
@@ -225,20 +248,40 @@ export function MatchScreen() {
   if (phase === 'finished') {
     const won = result?.winnerId === myUserId;
     return (
-      <View style={styles.center}>
-        <Text style={styles.resultTitle}>
-          {result?.winnerId === null ? 'Match nul !' : won ? 'Victoire !' : 'Défaite...'}
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={[styles.resultTitle, { color: won ? colors.success : colors.error, fontFamily: fonts.heading }]}>
+          {result?.winnerId === null ? 'Match nul !' : won ? '🎉 Victoire !' : '😔 Défaite'}
         </Text>
-        <Text style={styles.resultReason}>
+        <Text style={[styles.resultReason, { color: colors.text, fontFamily: fonts.body }]}>
           {result?.reason === 'guessed' && 'Personnage deviné !'}
           {result?.reason === 'forfeit' && 'Adversaire déconnecté'}
           {result?.reason === 'draw' && 'Personne n\'a trouvé'}
         </Text>
+
+        {/* Rewards */}
+        {won && (result?.berryReward || result?.sharinganReward) && (
+          <View style={[styles.rewardsContainer, { backgroundColor: colors.surface, borderColor: colors.primary }]}>
+            <Text style={[styles.rewardsTitle, { color: colors.primary, fontFamily: fonts.bodyBold }]}>
+              Récompenses:
+            </Text>
+            {result?.berryReward ? (
+              <Text style={[styles.rewardText, { color: colors.warning, fontFamily: fonts.body }]}>
+                🫐 +{result.berryReward} Berry
+              </Text>
+            ) : null}
+            {result?.sharinganReward ? (
+              <Text style={[styles.rewardText, { color: colors.error, fontFamily: fonts.body }]}>
+                👁️ +{result.sharinganReward} Sharingan
+              </Text>
+            ) : null}
+          </View>
+        )}
+
         <TouchableOpacity
-          style={styles.backBtn}
+          style={[styles.backBtn, { backgroundColor: colors.primary }]}
           onPress={() => navigation.navigate('MainTabs')}
         >
-          <Text style={styles.backBtnText}>Retour à l'accueil</Text>
+          <Text style={[styles.backBtnText, { fontFamily: fonts.bodyBold }]}>Retour à l'accueil</Text>
         </TouchableOpacity>
       </View>
     );
@@ -246,11 +289,14 @@ export function MatchScreen() {
 
   return (
     <View style={styles.gameContainer}>
-      <View style={styles.topBar}>
-        <Text style={styles.turnIndicator}>
-          {isMyTurn ? 'Ton tour' : 'Tour adverse'}
+      <View style={[styles.topBar, { backgroundColor: isMyTurn ? colors.success + '20' : colors.warning + '20' }]}>
+        <TouchableOpacity onPress={handleGoBack} style={styles.backIconBtn}>
+          <MaterialIcons name="arrow-back" size={24} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={[styles.turnIndicator, { color: isMyTurn ? colors.success : colors.warning, fontFamily: fonts.bodyBold }]}>
+          {isMyTurn ? '🎯 Ton tour!' : '⏳ Tour adverse'}
         </Text>
-        <Text style={styles.timer}>{timerSeconds}s</Text>
+        <Text style={[styles.timer, { color: colors.primary, fontFamily: fonts.bodyBold }]}>{timerSeconds}s</Text>
       </View>
 
       {waitingForResponse && (
@@ -355,6 +401,16 @@ const styles = StyleSheet.create({
   selectedChar: { fontSize: 24, fontWeight: 'bold', color: '#e94560', marginBottom: 8 },
   resultTitle: { fontSize: 32, fontWeight: 'bold', color: '#e94560', marginBottom: 12 },
   resultReason: { fontSize: 16, color: '#aaa', marginBottom: 32 },
+  rewardsContainer: {
+    borderRadius: 12,
+    borderWidth: 2,
+    padding: 16,
+    marginBottom: 24,
+    alignItems: 'center',
+    gap: 8,
+  },
+  rewardsTitle: { fontSize: 16, marginBottom: 4 },
+  rewardText: { fontSize: 14 },
   backBtn: { backgroundColor: '#e94560', paddingVertical: 14, paddingHorizontal: 32, borderRadius: 8 },
   backBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   gameContainer: { flex: 1, backgroundColor: '#1a1a2e', paddingTop: 50 },
@@ -366,7 +422,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#333',
   },
-  turnIndicator: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  backIconBtn: { padding: 8 },
+  turnIndicator: { flex: 1, fontSize: 16, fontWeight: '600', color: '#fff', textAlign: 'center' },
   timer: { fontSize: 18, fontWeight: 'bold', color: '#e94560' },
   questionsList: { flex: 1, paddingHorizontal: 16, paddingTop: 8 },
   questionRow: {
