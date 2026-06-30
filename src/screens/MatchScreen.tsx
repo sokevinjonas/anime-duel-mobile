@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,9 @@ import {
   FlatList,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -48,9 +50,14 @@ export function MatchScreen() {
   const [showCharPicker, setShowCharPicker] = useState(false);
   const [selectedChar, setSelectedChar] = useState<string | null>(null);
   const [result, setResult] = useState<{ winnerId: string | null; reason: string; berryReward?: number; sharinganReward?: number } | null>(null);
-  const [timerSeconds, setTimerSeconds] = useState(60);
+  const [timerSeconds, setTimerSeconds] = useState(15);
   const [myUserId] = useState(user?.id || '');
   const [waitingForResponse, setWaitingForResponse] = useState(false);
+  const [opponentSelected, setOpponentSelected] = useState(false);
+  const [typingDots, setTypingDots] = useState('.');
+  const characterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const timerEndRef = useRef<number | null>(null);
 
   const setupSocket = useCallback(async () => {
     const token = await getAccessToken();
@@ -66,29 +73,54 @@ export function MatchScreen() {
     socket.on('match:player_joined', () => {
       setPhase('choosing');
       setShowCharPicker(true);
+      // Start 7s character selection timeout
+      if (characterTimeoutRef.current) clearTimeout(characterTimeoutRef.current);
+      characterTimeoutRef.current = setTimeout(() => {
+        socket.emit('match:character_timeout');
+      }, 7000);
+    });
+
+    socket.on('match:character_selected', (data: { userId: string }) => {
+      if (data.userId !== myUserId) {
+        setOpponentSelected(true);
+      }
+    });
+
+    socket.on('match:character_auto_selected', (data: { characterId: string; userId: string }) => {
+      if (data.userId !== myUserId) {
+        setOpponentSelected(true);
+      }
     });
 
     socket.on('match:start', (data: { activePlayerId: string; timerEnd: number }) => {
       setPhase('playing');
       setIsMyTurn(data.activePlayerId === myUserId);
+      timerEndRef.current = data.timerEnd;
       updateTimer(data.timerEnd);
+      if (characterTimeoutRef.current) clearTimeout(characterTimeoutRef.current);
     });
 
     socket.on('turn:ai_response', (data: QuestionEntry) => {
       setQuestions((prev) => [...prev, data]);
-      setWaitingForResponse(false); // Hide waiting indicator
+      setWaitingForResponse(false);
     });
 
     socket.on('turn:end', (data: { activePlayerId: string; timerEnd: number }) => {
       setIsMyTurn(data.activePlayerId === myUserId);
-      setWaitingForResponse(false); // Clear waiting state
-      setTimerSeconds(60); // Reset timer for new turn
+      setWaitingForResponse(false);
+      timerEndRef.current = data.timerEnd;
       updateTimer(data.timerEnd);
+    });
+
+    socket.on('turn:timeout', () => {
+      // Timer expired, auto-submit empty answer
+      if (isMyTurn) {
+        socket.emit('turn:submit_answer', { answer: '' });
+      }
     });
 
     socket.on('turn:sharingan_used', (data: { userId: string; hint: string }) => {
       if (data.userId !== myUserId) {
-        // Opponent used Sharingan, show their hint
         setQuestions((prev) => [...prev, {
           playerId: data.userId,
           question: `💡 Indice: ${data.hint}`,
@@ -137,6 +169,8 @@ export function MatchScreen() {
     setupSocket();
     return () => {
       const socket = getSocket();
+      if (characterTimeoutRef.current) clearTimeout(characterTimeoutRef.current);
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
       socket.emit('match:leave');
       socket.disconnect();
     };
@@ -147,13 +181,45 @@ export function MatchScreen() {
     setTimerSeconds(remaining);
   };
 
+  // Backend-driven timer: update every 1s by calculating remaining time from timerEnd
   useEffect(() => {
-    if (phase !== 'playing') return;
+    if (phase !== 'playing' || !timerEndRef.current) return;
+
     const interval = setInterval(() => {
-      setTimerSeconds((prev) => Math.max(0, prev - 1));
+      if (timerEndRef.current) {
+        const remaining = Math.max(0, Math.floor((timerEndRef.current - Date.now()) / 1000));
+        setTimerSeconds(remaining);
+
+        // Auto-timeout when timer reaches 0
+        if (remaining <= 0) {
+          const socket = getSocket();
+          socket.emit('turn:submit_answer', { answer: '' });
+        }
+      }
     }, 1000);
+
     return () => clearInterval(interval);
   }, [phase]);
+
+  // Animate typing dots when waiting for opponent
+  useEffect(() => {
+    if (!waitingForResponse) {
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+      return;
+    }
+
+    typingIntervalRef.current = setInterval(() => {
+      setTypingDots((prev) => {
+        if (prev === '.') return '..';
+        if (prev === '..') return '...';
+        return '.';
+      });
+    }, 500);
+
+    return () => {
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+    };
+  }, [waitingForResponse]);
 
   const handleGoBack = useCallback(() => {
     if (phase === 'playing') {
@@ -226,15 +292,19 @@ export function MatchScreen() {
 
   if (phase === 'choosing') {
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
         {selectedChar ? (
           <>
-            <Text style={styles.statusText}>Personnage choisi !</Text>
-            <Text style={styles.selectedChar}>{selectedChar}</Text>
-            <Text style={styles.hint}>En attente de l'adversaire...</Text>
+            <Text style={[styles.statusText, { color: colors.text, fontFamily: fonts.body }]}>Personnage choisi !</Text>
+            <Text style={[styles.selectedChar, { color: colors.cta, fontFamily: fonts.heading }]}>{selectedChar}</Text>
+            {opponentSelected ? (
+              <Text style={[styles.hint, { color: colors.success, fontFamily: fonts.body }]}>L'adversaire a aussi choisi !</Text>
+            ) : (
+              <Text style={[styles.hint, { color: colors.textSecondary, fontFamily: fonts.body }]}>En attente de l'adversaire...</Text>
+            )}
           </>
         ) : (
-          <Text style={styles.statusText}>Choisis ton personnage...</Text>
+          <Text style={[styles.statusText, { color: colors.text, fontFamily: fonts.body }]}>Choisis ton personnage...</Text>
         )}
         <CharacterPicker
           visible={showCharPicker}
@@ -291,8 +361,8 @@ export function MatchScreen() {
   }
 
   return (
-    <View style={styles.gameContainer}>
-      <View style={[styles.topBar, { backgroundColor: isMyTurn ? colors.success + '20' : colors.warning + '20' }]}>
+    <View style={[styles.gameContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles.topBar, { backgroundColor: isMyTurn ? colors.success + '20' : colors.warning + '20', borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={handleGoBack} style={styles.backIconBtn}>
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
@@ -303,10 +373,10 @@ export function MatchScreen() {
       </View>
 
       {waitingForResponse && (
-        <View style={styles.waitingContainer}>
+        <View style={[styles.waitingContainer, { backgroundColor: colors.surface, borderColor: colors.primary }]}>
           <ActivityIndicator size="large" color={colors.primary} />
           <Text style={[styles.waitingText, { color: colors.text, fontFamily: fonts.body }]}>
-            En attente de la réponse de l'adversaire...
+            L'adversaire répond{typingDots}
           </Text>
         </View>
       )}
@@ -316,8 +386,8 @@ export function MatchScreen() {
         keyExtractor={(_, i) => i.toString()}
         style={styles.questionsList}
         renderItem={({ item }) => (
-          <View style={styles.questionRow}>
-            <Text style={styles.questionText}>{item.question}</Text>
+          <View style={[styles.questionRow, { borderBottomColor: colors.border }]}>
+            <Text style={[styles.questionText, { color: colors.text, fontFamily: fonts.body }]}>{item.question}</Text>
             <Text
               style={[
                 styles.answerBadge,
@@ -332,18 +402,18 @@ export function MatchScreen() {
         )}
       />
 
-      <View style={styles.actionBar}>
+      <View style={[styles.actionBar, { borderTopColor: colors.border, backgroundColor: colors.surface }]}>
         {isMyTurn && (
           <>
             <View style={styles.inputRow}>
               <TextInput
-                style={styles.questionInput}
+                style={[styles.questionInput, { backgroundColor: colors.surfaceElevated, color: colors.text, borderColor: colors.border }]}
                 placeholder="Pose ta question..."
-                placeholderTextColor="#666"
+                placeholderTextColor={colors.textMuted}
                 value={question}
                 onChangeText={setQuestion}
               />
-              <TouchableOpacity style={styles.sendBtn} onPress={handleAskQuestion}>
+              <TouchableOpacity style={[styles.sendBtn, { backgroundColor: colors.primary }]} onPress={handleAskQuestion}>
                 <Text style={styles.sendBtnText}>?</Text>
               </TouchableOpacity>
             </View>
@@ -354,13 +424,13 @@ export function MatchScreen() {
               </TouchableOpacity>
               <View style={styles.guessRow}>
                 <TextInput
-                  style={styles.guessInput}
+                  style={[styles.guessInput, { backgroundColor: colors.surfaceElevated, color: colors.text, borderColor: colors.success }]}
                   placeholder="Deviner..."
-                  placeholderTextColor="#666"
+                  placeholderTextColor={colors.textMuted}
                   value={guess}
                   onChangeText={setGuess}
                 />
-                <TouchableOpacity style={styles.guessBtn} onPress={handleSubmitGuess}>
+                <TouchableOpacity style={[styles.guessBtn, { backgroundColor: colors.success }]} onPress={handleSubmitGuess}>
                   <Text style={styles.guessBtnText}>Deviner</Text>
                 </TouchableOpacity>
               </View>
@@ -377,33 +447,29 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1a1a2e',
     padding: 24,
   },
-  statusText: { fontSize: 20, color: '#fff', marginBottom: 16 },
+  statusText: { fontSize: 20, marginBottom: 16 },
   waitingContainer: {
     padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     margin: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e94560',
   },
   waitingText: { fontSize: 14, textAlign: 'center' },
   codeDisplay: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#e94560',
     letterSpacing: 6,
     marginBottom: 8,
   },
-  hint: { fontSize: 14, color: '#aaa' },
-  selectedChar: { fontSize: 24, fontWeight: 'bold', color: '#e94560', marginBottom: 8 },
-  resultTitle: { fontSize: 32, fontWeight: 'bold', color: '#e94560', marginBottom: 12 },
-  resultReason: { fontSize: 16, color: '#aaa', marginBottom: 32 },
+  hint: { fontSize: 14 },
+  selectedChar: { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
+  resultTitle: { fontSize: 32, fontWeight: 'bold', marginBottom: 12 },
+  resultReason: { fontSize: 16, marginBottom: 32 },
   rewardsContainer: {
     borderRadius: 12,
     borderWidth: 2,
@@ -415,20 +481,19 @@ const styles = StyleSheet.create({
   rewardsTitle: { fontSize: 16, marginBottom: 4 },
   rewardRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   rewardText: { fontSize: 14 },
-  backBtn: { backgroundColor: '#e94560', paddingVertical: 14, paddingHorizontal: 32, borderRadius: 8 },
+  backBtn: { paddingVertical: 14, paddingHorizontal: 32, borderRadius: 8 },
   backBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  gameContainer: { flex: 1, backgroundColor: '#1a1a2e', paddingTop: 50 },
+  gameContainer: { flex: 1, paddingTop: 50 },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
   },
   backIconBtn: { padding: 8 },
-  turnIndicator: { flex: 1, fontSize: 16, fontWeight: '600', color: '#fff', textAlign: 'center' },
-  timer: { fontSize: 18, fontWeight: 'bold', color: '#e94560' },
+  turnIndicator: { flex: 1, fontSize: 16, fontWeight: '600', textAlign: 'center' },
+  timer: { fontSize: 18, fontWeight: 'bold' },
   questionsList: { flex: 1, paddingHorizontal: 16, paddingTop: 8 },
   questionRow: {
     flexDirection: 'row',
@@ -436,9 +501,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#222',
   },
-  questionText: { flex: 1, fontSize: 14, color: '#fff', marginRight: 8 },
+  questionText: { flex: 1, fontSize: 14, marginRight: 8 },
   answerBadge: {
     paddingVertical: 4,
     paddingHorizontal: 10,
@@ -450,21 +514,17 @@ const styles = StyleSheet.create({
   answerYes: { backgroundColor: '#2ecc71', color: '#fff' },
   answerNo: { backgroundColor: '#e74c3c', color: '#fff' },
   answerPartial: { backgroundColor: '#f39c12', color: '#fff' },
-  actionBar: { padding: 16, borderTopWidth: 1, borderTopColor: '#333' },
+  actionBar: { padding: 16, borderTopWidth: 1 },
   inputRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   questionInput: {
     flex: 1,
-    backgroundColor: '#16213e',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 14,
-    color: '#fff',
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#333',
   },
   sendBtn: {
-    backgroundColor: '#e94560',
     borderRadius: 8,
     width: 44,
     alignItems: 'center',
@@ -485,17 +545,13 @@ const styles = StyleSheet.create({
   guessRow: { flex: 1, flexDirection: 'row', gap: 8 },
   guessInput: {
     flex: 1,
-    backgroundColor: '#16213e',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    color: '#fff',
     fontSize: 14,
     borderWidth: 1,
-    borderColor: '#2ecc71',
   },
   guessBtn: {
-    backgroundColor: '#2ecc71',
     borderRadius: 8,
     paddingHorizontal: 14,
     justifyContent: 'center',

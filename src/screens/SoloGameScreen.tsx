@@ -61,6 +61,7 @@ export function SoloGameScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const sessionIdRef = useRef<string | null>(null);
+  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [maxQuestions, setMaxQuestions] = useState(10);
@@ -74,8 +75,8 @@ export function SoloGameScreen() {
   const [sharinganRemaining, setJokersRemaining] = useState(3);
   const [aiAvatarUrl, setAiAvatarUrl] = useState<string>('');
   const [showSharinganModal, setShowSharinganModal] = useState(false);
-  const [timePerQuestion] = useState(60); // seconds
-  const [remainingTime, setRemainingTime] = useState(60);
+  const [typingDots, setTypingDots] = useState('.');
+  const [isWaitingForAI, setIsWaitingForAI] = useState(false);
 
   const [startGame, { loading: starting, error: startError }] = useMutation(START_SOLO_GAME);
   const [askQuestion, { loading: asking, error: askError }] = useMutation(ASK_QUESTION);
@@ -90,24 +91,6 @@ export function SoloGameScreen() {
   useEffect(() => {
     handleStartGame();
   }, []);
-
-  // Timer countdown per question
-  useEffect(() => {
-    if (!sessionId || gameOver || remainingTime <= 0) return;
-
-    const interval = setInterval(() => {
-      setRemainingTime(prev => Math.max(0, prev - 1));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [sessionId, gameOver, remainingTime]);
-
-  // Reset timer when question changes
-  useEffect(() => {
-    if (sessionId && !gameOver) {
-      setRemainingTime(timePerQuestion);
-    }
-  }, [turnNumber, sessionId, gameOver]);
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -150,6 +133,7 @@ export function SoloGameScreen() {
       // Add player message
       setMessages(prev => [...prev, { type: 'player', text: question }]);
       setCurrentQuestion('');
+      setIsWaitingForAI(true);
 
       const { data } = await askQuestion({
         variables: { sessionId, question },
@@ -159,12 +143,14 @@ export function SoloGameScreen() {
       const translatedAnswer = translateAnswer(data.soloAskQuestion.answer);
       setMessages(prev => [...prev, { type: 'ai', text: translatedAnswer }]);
       setTurnNumber(data.soloAskQuestion.turnNumber);
+      setIsWaitingForAI(false);
 
       if (data.soloAskQuestion.quotaReached) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       }
     } catch (error) {
       console.error('Error asking question:', error);
+      setIsWaitingForAI(false);
     }
   };
 
@@ -247,6 +233,33 @@ export function SoloGameScreen() {
     }
   }, [navigation, gameOver]);
 
+  // Animate typing dots when waiting for AI
+  useEffect(() => {
+    if (!isWaitingForAI) {
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+      return;
+    }
+
+    typingIntervalRef.current = setInterval(() => {
+      setTypingDots((prev) => {
+        if (prev === '.') return '..';
+        if (prev === '..') return '...';
+        return '.';
+      });
+    }, 500);
+
+    return () => {
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+    };
+  }, [isWaitingForAI]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (typingIntervalRef.current) clearInterval(typingIntervalRef.current);
+    };
+  }, []);
+
   if (starting) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -299,14 +312,9 @@ export function SoloGameScreen() {
           Mode Solo
         </Text>
         <View style={styles.headerRight}>
-          <View style={styles.headerStats}>
           <Text style={[styles.questionsCount, { color: colors.primary, fontFamily: fonts.bodyBold }]}>
             {turnNumber}/{maxQuestions}
           </Text>
-          <Text style={[styles.timerText, { color: remainingTime <= 10 ? colors.error : colors.warning, fontFamily: fonts.bodyBold }]}>
-            {remainingTime}s
-          </Text>
-        </View>
           <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
             <TouchableOpacity
               style={[styles.sharinganBtn, { backgroundColor: sharinganRemaining > 0 ? colors.orange : colors.border }]}
@@ -364,6 +372,38 @@ export function SoloGameScreen() {
             </View>
           ) : null
         ))}
+        {isWaitingForAI && (
+          <View style={[styles.messageRow, { justifyContent: 'flex-start' }]}>
+            {aiAvatarUrl && (
+              <Image
+                source={{ uri: aiAvatarUrl }}
+                style={styles.avatar}
+              />
+            )}
+            <View
+              style={[
+                styles.messageBubble,
+                {
+                  backgroundColor: colors.surface,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.messageText,
+                  {
+                    color: colors.textMuted,
+                    fontFamily: fonts.body,
+                  },
+                ]}
+              >
+                L'IA répond{typingDots}
+              </Text>
+            </View>
+          </View>
+        )}
       </ScrollView>
 
       {/* Input area */}
@@ -434,9 +474,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: { fontSize: 18, flex: 1, marginLeft: 12 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  headerStats: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   questionsCount: { fontSize: 16 },
-  timerText: { fontSize: 14, fontWeight: 'bold' },
   sharinganBtn: {
     flexDirection: 'row',
     alignItems: 'center',
