@@ -5,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { gql } from '@apollo/client';
-import { useMutation } from '@apollo/client/react';
+import { useMutation, useQuery } from '@apollo/client/react';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
@@ -16,6 +16,14 @@ import { ConfirmModal } from '../components/ConfirmModal';
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
+
+const USER_SHARINGAN_QUERY = gql`
+  query UserSharingan {
+    me {
+      sharinganCount
+    }
+  }
+`;
 
 const START_SOLO_GAME = gql`
   mutation StartSoloPlayerGuesses($difficulty: String!) {
@@ -73,13 +81,14 @@ export function SoloGameScreen() {
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState('');
-  const [sharinganRemaining, setJokersRemaining] = useState(3);
+  const [sharinganRemaining, setJokersRemaining] = useState(0);
   const [aiAvatarUrl, setAiAvatarUrl] = useState<string>('');
   const [showSharinganModal, setShowSharinganModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [typingDots, setTypingDots] = useState('...');
   const [isWaitingForAI, setIsWaitingForAI] = useState(false);
 
+  const { data: userData } = useQuery(USER_SHARINGAN_QUERY);
   const [startGame, { loading: starting, error: startError }] = useMutation(START_SOLO_GAME);
   const [askQuestion, { loading: asking, error: askError }] = useMutation(ASK_QUESTION);
   const [submitGuess, { loading: guessing, error: guessError }] = useMutation(SUBMIT_GUESS);
@@ -89,6 +98,14 @@ export function SoloGameScreen() {
   useAuthErrorHandler(startError);
   useAuthErrorHandler(askError);
   useAuthErrorHandler(guessError);
+
+  // Update sharingan count from backend
+  useEffect(() => {
+    if (userData?.me?.sharinganCount !== undefined) {
+      console.log('Setting sharingan count from backend:', userData.me.sharinganCount);
+      setJokersRemaining(userData.me.sharinganCount);
+    }
+  }, [userData]);
 
   useEffect(() => {
     handleStartGame();
