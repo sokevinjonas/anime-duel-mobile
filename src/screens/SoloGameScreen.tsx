@@ -73,7 +73,6 @@ export function SoloGameScreen() {
   const [sharinganRemaining, setJokersRemaining] = useState(3);
   const [aiAvatarUrl, setAiAvatarUrl] = useState<string>('');
   const [showSharinganModal, setShowSharinganModal] = useState(false);
-  const [sharinganVariant, setSharinganVariant] = useState<'eye' | 'flash' | 'smoke'>('eye');
 
   const [startGame, { loading: starting, error: startError }] = useMutation(START_SOLO_GAME);
   const [askQuestion, { loading: asking, error: askError }] = useMutation(ASK_QUESTION);
@@ -368,34 +367,10 @@ export function SoloGameScreen() {
       {/* Sharingan Modal */}
       <SharinganModal
         visible={showSharinganModal}
-        variant={sharinganVariant}
+        variant="eye"
         duration={2000}
         onHide={() => setShowSharinganModal(false)}
       />
-
-      {/* Debug: Switch variants */}
-      {__DEV__ && (
-        <View style={styles.debugPanel}>
-          <TouchableOpacity
-            onPress={() => setSharinganVariant('eye')}
-            style={[styles.debugBtn, sharinganVariant === 'eye' && { backgroundColor: colors.primary }]}
-          >
-            <Text style={styles.debugText}>Eye</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setSharinganVariant('flash')}
-            style={[styles.debugBtn, sharinganVariant === 'flash' && { backgroundColor: colors.primary }]}
-          >
-            <Text style={styles.debugText}>Flash</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setSharinganVariant('smoke')}
-            style={[styles.debugBtn, sharinganVariant === 'smoke' && { backgroundColor: colors.primary }]}
-          >
-            <Text style={styles.debugText}>Smoke</Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
 }
@@ -488,27 +463,4 @@ const styles = StyleSheet.create({
   },
   resultTitle: { fontSize: 32 },
   resultText: { fontSize: 16, textAlign: 'center', lineHeight: 24 },
-  debugPanel: {
-    position: 'absolute',
-    bottom: 80,
-    left: 12,
-    right: 12,
-    flexDirection: 'row',
-    gap: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    padding: 10,
-    borderRadius: 8,
-  },
-  debugBtn: {
-    flex: 1,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  debugText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
 });
