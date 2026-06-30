@@ -37,6 +37,7 @@ const USER_CHAKRA_QUERY = gql`
       berry
       fillerUsedToday
       refillCountToday
+      lastChakraRegen
     }
   }
 `;
@@ -78,17 +79,28 @@ export function ChakraModal({
   const canUseBerry = currentBerry >= refillPriceBerry;
   const canUseFiller = fillersUsed < 3;
 
-  // Estimate time to next Chakra (30 min per batch of 3)
-  // Note: Timer is approximate since we don't have lastChakraRegen from backend yet
+  // Calculate time to next Chakra regen (30 min per batch of 3)
   useEffect(() => {
     if (!visible || currentChakra >= maxChakra) {
       setTimeRemaining(0);
       return;
     }
 
-    // Show static timer of 30 min (will be accurate once backend exposes lastChakraRegen)
-    setTimeRemaining(30 * 60 * 1000);
-  }, [visible, currentChakra, maxChakra]);
+    const lastRegen = user?.lastChakraRegen ? new Date(user.lastChakraRegen).getTime() : Date.now();
+    const regenTimeMs = 30 * 60 * 1000; // 30 minutes
+
+    const updateTimer = () => {
+      const now = Date.now();
+      const elapsed = now - lastRegen;
+      const remaining = Math.max(0, regenTimeMs - (elapsed % regenTimeMs));
+      setTimeRemaining(remaining);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000); // Update every second
+
+    return () => clearInterval(interval);
+  }, [visible, currentChakra, maxChakra, user?.lastChakraRegen]);
 
   const formatTime = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
