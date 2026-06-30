@@ -6,6 +6,7 @@ import { gql } from '@apollo/client';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
+import { SharinganEyeIcon } from '../components/icons/SharinganEyeIcon';
 import { useAuthErrorHandler } from '../hooks/useAuthErrorHandler';
 
 const CURRENT_EVENT_QUERY = gql`

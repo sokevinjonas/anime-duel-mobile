@@ -304,7 +304,7 @@ export function SoloGameScreen() {
             {turnNumber}/{maxQuestions}
           </Text>
           <Text style={[styles.timerText, { color: remainingTime <= 10 ? colors.error : colors.warning, fontFamily: fonts.bodyBold }]}>
-            ⏱️ {remainingTime}s
+            {remainingTime}s
           </Text>
         </View>
           <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>

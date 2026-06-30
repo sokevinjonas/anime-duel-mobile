@@ -270,9 +270,12 @@ export function MatchScreen() {
               </Text>
             ) : null}
             {result?.sharinganReward ? (
-              <Text style={[styles.rewardText, { color: colors.error, fontFamily: fonts.body }]}>
-                👁️ +{result.sharinganReward} Sharingan
-              </Text>
+              <View style={styles.rewardRow}>
+                <SharinganEyeIcon size={18} color={colors.error} />
+                <Text style={[styles.rewardText, { color: colors.error, fontFamily: fonts.body }]}>
+                  +{result.sharinganReward} Sharingan
+                </Text>
+              </View>
             ) : null}
           </View>
         )}
@@ -294,7 +297,7 @@ export function MatchScreen() {
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.turnIndicator, { color: isMyTurn ? colors.success : colors.warning, fontFamily: fonts.bodyBold }]}>
-          {isMyTurn ? '🎯 Ton tour!' : '⏳ Tour adverse'}
+          {isMyTurn ? 'Ton tour' : 'Tour adverse'}
         </Text>
         <Text style={[styles.timer, { color: colors.primary, fontFamily: fonts.bodyBold }]}>{timerSeconds}s</Text>
       </View>
@@ -410,6 +413,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   rewardsTitle: { fontSize: 16, marginBottom: 4 },
+  rewardRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   rewardText: { fontSize: 14 },
   backBtn: { backgroundColor: '#e94560', paddingVertical: 14, paddingHorizontal: 32, borderRadius: 8 },
   backBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
