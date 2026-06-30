@@ -10,6 +10,7 @@ import { useTheme } from '../theme/ThemeContext';
 import { fonts } from '../theme/fonts';
 import { Card } from '../components/ui/Card';
 import { SectionTitle } from '../components/ui/SectionTitle';
+import { BerryIcon, SharinganIcon } from '../components/icons';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -20,8 +21,8 @@ const ME_QUERY = gql`
       username
       email
       avatar
-      coins
-      jokersCount
+      berry
+      sharinganCount
       currentLevel
       currentTier
       streakDays
@@ -148,25 +149,25 @@ export function ProfileScreen() {
         <View style={styles.inventoryRow}>
           <Card elevated style={styles.inventoryCard}>
             <View style={[styles.inventoryIcon, { backgroundColor: colors.warning + '15' }]}>
-              <Text style={styles.inventoryEmoji}>💰</Text>
+              <BerryIcon size={32} color={colors.warning} />
             </View>
             <Text style={[styles.inventoryValue, { color: colors.warning, fontFamily: fonts.heading }]}>
-              {user?.coins}
+              {user?.berry}
             </Text>
             <Text style={[styles.inventoryLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>
-              Pièces
+              Berry
             </Text>
           </Card>
 
           <Card elevated style={styles.inventoryCard}>
             <View style={[styles.inventoryIcon, { backgroundColor: colors.primary + '15' }]}>
-              <Text style={styles.inventoryEmoji}>🃏</Text>
+              <SharinganIcon size={32} color={colors.error} />
             </View>
             <Text style={[styles.inventoryValue, { color: colors.primary, fontFamily: fonts.heading }]}>
-              {user?.jokersCount}
+              {user?.sharinganCount}
             </Text>
             <Text style={[styles.inventoryLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>
-              Jokers
+              Sharingan
             </Text>
           </Card>
         </View>

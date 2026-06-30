@@ -1,49 +1,38 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../theme/ThemeContext';
 import { fonts } from '../../theme/fonts';
+import { ChakraIcon, BerryIcon } from '../icons';
 
 interface EnergyBarProps {
   current: number;
   max: number;
-  coins?: number;
-  gems?: number;
+  berry?: number;
   onEnergyPress?: () => void;
 }
 
-export function EnergyBar({ current, max, coins, gems, onEnergyPress }: EnergyBarProps) {
+export function EnergyBar({ current, max, berry, onEnergyPress }: EnergyBarProps) {
   const { colors } = useTheme();
 
   return (
     <View style={styles.container}>
-      {/* Energy */}
+      {/* Chakra */}
       <TouchableOpacity
         style={[styles.item, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}
         onPress={onEnergyPress}
         activeOpacity={0.7}
       >
-        <MaterialIcons name="favorite" size={18} color="#FF6B6B" />
+        <ChakraIcon size={18} color={colors.primary} />
         <Text style={[styles.value, { color: colors.text, fontFamily: fonts.bodyBold }]}>
           {current}/{max}
         </Text>
       </TouchableOpacity>
 
-      {/* Coins */}
-      {coins !== undefined && (
+      {/* Berry */}
+      {berry !== undefined && (
         <View style={[styles.item, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
-          <MaterialIcons name="toll" size={18} color="#FFD93D" />
+          <BerryIcon size={18} color={colors.warning} />
           <Text style={[styles.value, { color: colors.text, fontFamily: fonts.bodyBold }]}>
-            {coins}
-          </Text>
-        </View>
-      )}
-
-      {/* Gems */}
-      {gems !== undefined && (
-        <View style={[styles.item, { backgroundColor: colors.surfaceElevated, borderColor: colors.border }]}>
-          <MaterialIcons name="diamond" size={18} color="#6BCFFF" />
-          <Text style={[styles.value, { color: colors.text, fontFamily: fonts.bodyBold }]}>
-            {gems}
+            {berry}
           </Text>
         </View>
       )}
