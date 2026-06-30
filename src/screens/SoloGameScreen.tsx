@@ -62,6 +62,7 @@ export function SoloGameScreen() {
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [maxQuestions, setMaxQuestions] = useState(10);
+  const [turnNumber, setTurnNumber] = useState(0);
   const [messages, setMessages] = useState<Array<{ type: 'player' | 'ai'; text: string }>>([]);
   const [currentQuestion, setCurrentQuestion] = useState('');
   const [guess, setGuess] = useState('');
@@ -134,6 +135,7 @@ export function SoloGameScreen() {
       // Add AI response
       const translatedAnswer = translateAnswer(data.soloAskQuestion.answer);
       setMessages(prev => [...prev, { type: 'ai', text: translatedAnswer }]);
+      setTurnNumber(data.soloAskQuestion.turnNumber);
 
       if (data.soloAskQuestion.quotaReached) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -260,7 +262,7 @@ export function SoloGameScreen() {
         </Text>
         <View style={styles.headerRight}>
           <Text style={[styles.questionsCount, { color: colors.primary, fontFamily: fonts.bodyBold }]}>
-            {messages.length}/{maxQuestions}
+            {turnNumber}/{maxQuestions}
           </Text>
           <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
             <TouchableOpacity
