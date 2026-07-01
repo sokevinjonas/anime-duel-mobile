@@ -60,7 +60,7 @@ export function CharacterPicker({
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text, fontFamily: fonts.heading }]}>CHOISIS TON PERSO</Text>
           <TouchableOpacity onPress={onClose} activeOpacity={0.7}>
-            <Text style={[styles.closeBtn, { color: colors.cta, fontFamily: fonts.bodyBold }]}>Fermer</Text>
+            <Text style={[styles.closeBtn, { color: colors.primary, fontFamily: fonts.bodyBold }]}>Fermer</Text>
           </TouchableOpacity>
         </View>
         <TextInput
@@ -94,7 +94,7 @@ export function CharacterPicker({
                 <Text style={[styles.itemName, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                   {item.name}
                 </Text>
-                <Text style={[styles.itemAnime, { color: colors.cta, fontFamily: fonts.body }]}>
+                <Text style={[styles.itemAnime, { color: colors.primary, fontFamily: fonts.body }]}>
                   {item.anime.title}
                 </Text>
                 {isSelected && (

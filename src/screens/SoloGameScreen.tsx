@@ -362,7 +362,7 @@ export function SoloGameScreen() {
               disabled={sharinganRemaining <= 0 || sharinganLoading}
             >
               <SharinganEyeIcon size={20} color={sharinganRemaining > 0 ? colors.error : colors.textMuted} />
-              <Text style={[styles.sharinganText, { color: sharinganRemaining > 0 ? '#000' : colors.textMuted }]}>
+              <Text style={[styles.sharinganText, { color: sharinganRemaining > 0 ? colors.text : colors.textMuted }]}>
                 {sharinganRemaining}
               </Text>
             </TouchableOpacity>

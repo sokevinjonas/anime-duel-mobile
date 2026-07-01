@@ -58,7 +58,7 @@ export function CatalogScreen() {
               activeOpacity={0.7}
             >
               <Text style={[styles.charName, { color: colors.text, fontFamily: fonts.bodyBold }]}>{item.name}</Text>
-              <Text style={[styles.animeName, { color: colors.cta, fontFamily: fonts.body }]}>{item.anime.title}</Text>
+              <Text style={[styles.animeName, { color: colors.primary, fontFamily: fonts.body }]}>{item.anime.title}</Text>
             </TouchableOpacity>
           )}
           ListEmptyComponent={

@@ -26,7 +26,7 @@ export function Button({
 
   const bgColors = {
     primary: colors.primary,
-    cta: colors.cta,
+    cta: colors.primary,
     secondary: colors.surface,
     ghost: 'transparent',
   };

@@ -35,8 +35,8 @@ export function LeaderboardScreen() {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.title, { color: colors.text, fontFamily: fonts.heading }]}>🎖️ Hall des Kage</Text>
       {myRank && (
-        <View style={[styles.myRankCard, { backgroundColor: colors.surface, borderColor: colors.cta }]}>
-          <Text style={[styles.myRankText, { color: colors.cta, fontFamily: fonts.bodyBold }]}>Ta position : #{myRank}</Text>
+        <View style={[styles.myRankCard, { backgroundColor: colors.surface, borderColor: colors.primary }]}>
+          <Text style={[styles.myRankText, { color: colors.primary, fontFamily: fonts.bodyBold }]}>Ta position : #{myRank}</Text>
         </View>
       )}
       <FlatList

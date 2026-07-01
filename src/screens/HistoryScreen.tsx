@@ -41,14 +41,14 @@ const MODE_EMOJI: Record<string, string> = {
   SOLO_AI_GUESSES: '🤖',
 };
 
-const DIFFICULTY_COLORS: Record<string, string> = {
-  EASY: '#2ecc71',
-  MEDIUM: '#f39c12',
-  HARD: '#e74c3c',
-};
-
 export function HistoryScreen() {
   const { colors } = useTheme();
+
+  const DIFFICULTY_COLORS: Record<string, string> = {
+    EASY: colors.success,
+    MEDIUM: colors.warning,
+    HARD: colors.error,
+  };
   const [refreshing, setRefreshing] = useState(false);
 
   const { data, loading, refetch } = useQuery<any>(HISTORY_QUERY, {

@@ -136,7 +136,7 @@ export function ProfileScreen() {
               <Text style={[styles.winsLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>
                 Victoires
               </Text>
-              <Text style={[styles.winsValue, { color: colors.cta, fontFamily: fonts.heading }]}>
+              <Text style={[styles.winsValue, { color: colors.primary, fontFamily: fonts.heading }]}>
                 {user?.totalWins}
               </Text>
             </View>

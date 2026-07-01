@@ -26,6 +26,9 @@ export function WelcomeGiftModal({ visible, onClose }: WelcomeGiftModalProps) {
   const [shakeAnim] = useState(new Animated.Value(0));
   const [scaleAnim] = useState(new Animated.Value(0));
   const [fadeAnim] = useState(new Animated.Value(0));
+  const [card1Anim] = useState(new Animated.Value(0));
+  const [card2Anim] = useState(new Animated.Value(0));
+  const [card3Anim] = useState(new Animated.Value(0));
 
   useEffect(() => {
     if (visible && !opened) {
@@ -68,6 +71,28 @@ export function WelcomeGiftModal({ visible, onClose }: WelcomeGiftModalProps) {
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 500,
+          useNativeDriver: true,
+        }),
+      ]).start();
+
+      // Stagger animation for rewards cards
+      Animated.stagger(200, [
+        Animated.spring(card1Anim, {
+          toValue: 1,
+          tension: 80,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(card2Anim, {
+          toValue: 1,
+          tension: 80,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.spring(card3Anim, {
+          toValue: 1,
+          tension: 80,
+          friction: 8,
           useNativeDriver: true,
         }),
       ]).start();
@@ -151,43 +176,123 @@ export function WelcomeGiftModal({ visible, onClose }: WelcomeGiftModalProps) {
                   </Text>
 
                   <View style={styles.rewardsGrid}>
-                    <View style={[styles.rewardCard, { backgroundColor: colors.surface }]}>
+                    <Animated.View
+                      style={[
+                        styles.rewardCard,
+                        { backgroundColor: colors.surface },
+                        {
+                          opacity: card1Anim,
+                          transform: [
+                            {
+                              scale: card1Anim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.5, 1],
+                              }),
+                            },
+                            {
+                              translateY: card1Anim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [50, 0],
+                              }),
+                            },
+                          ],
+                        },
+                      ]}
+                    >
                       <LinearGradient
-                        colors={[colors.warning + '20', colors.warning + '05']}
+                        colors={[colors.berry + '20', colors.berry + '05']}
                         style={styles.rewardGradient}
                       >
-                        <View style={[styles.rewardIconBox, { backgroundColor: colors.warning + '30' }]}>
-                          <Text style={styles.rewardEmoji}>10</Text>
+                        <View style={[styles.rewardIconBox, { backgroundColor: colors.berry + '30' }]}>
+                          <Text style={styles.rewardEmoji}>🫐</Text>
                         </View>
-                        <Text style={[styles.rewardValue, { color: colors.warning, fontFamily: fonts.heading }]}>
-                          Pièces
+                        <Text style={[styles.rewardValue, { color: colors.berry, fontFamily: fonts.heading }]}>
+                          500 Berry
                         </Text>
                       </LinearGradient>
-                    </View>
+                    </Animated.View>
 
-                    <View style={[styles.rewardCard, { backgroundColor: colors.surface }]}>
+                    <Animated.View
+                      style={[
+                        styles.rewardCard,
+                        { backgroundColor: colors.surface },
+                        {
+                          opacity: card2Anim,
+                          transform: [
+                            {
+                              scale: card2Anim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.5, 1],
+                              }),
+                            },
+                            {
+                              translateY: card2Anim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [50, 0],
+                              }),
+                            },
+                          ],
+                        },
+                      ]}
+                    >
                       <LinearGradient
-                        colors={[colors.primary + '20', colors.primary + '05']}
+                        colors={[colors.error + '20', colors.error + '05']}
                         style={styles.rewardGradient}
                       >
-                        <View style={[styles.rewardIconBox, { backgroundColor: colors.primary + '30' }]}>
-                          <Text style={styles.rewardEmoji}>3</Text>
+                        <View style={[styles.rewardIconBox, { backgroundColor: colors.error + '30' }]}>
+                          <Text style={styles.rewardEmoji}>👁️</Text>
                         </View>
-                        <Text style={[styles.rewardValue, { color: colors.primary, fontFamily: fonts.heading }]}>
-                          Sharingan
+                        <Text style={[styles.rewardValue, { color: colors.error, fontFamily: fonts.heading }]}>
+                          5 Sharingan
                         </Text>
                       </LinearGradient>
-                    </View>
+                    </Animated.View>
+
+                    <Animated.View
+                      style={[
+                        styles.rewardCard,
+                        { backgroundColor: colors.surface },
+                        {
+                          opacity: card3Anim,
+                          transform: [
+                            {
+                              scale: card3Anim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.5, 1],
+                              }),
+                            },
+                            {
+                              translateY: card3Anim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [50, 0],
+                              }),
+                            },
+                          ],
+                        },
+                      ]}
+                    >
+                      <LinearGradient
+                        colors={[colors.info + '20', colors.info + '05']}
+                        style={styles.rewardGradient}
+                      >
+                        <View style={[styles.rewardIconBox, { backgroundColor: colors.info + '30' }]}>
+                          <Text style={styles.rewardEmoji}>⚡</Text>
+                        </View>
+                        <Text style={[styles.rewardValue, { color: colors.info, fontFamily: fonts.heading }]}>
+                          8 Chakra
+                        </Text>
+                      </LinearGradient>
+                    </Animated.View>
                   </View>
 
                   <View style={[styles.infoBox, { backgroundColor: colors.primary + '12', borderColor: colors.primary }]}>
                     <Text style={[styles.infoText, { color: '#ffffff', fontFamily: fonts.body }]}>
-                      Les Berry te permettent de débloquer de nouveaux paliers. Les Sharingan t'aident à remporter tes matchs.
+                      Les Berry débloquent les Arcs. Les Sharingan t'aident en duel. Le Chakra est ton énergie de jeu.
                     </Text>
                   </View>
 
                   <TouchableOpacity
-                    style={[styles.closeButton, { backgroundColor: colors.cta }]}
+                    style={[styles.closeButton, { backgroundColor: colors.primary }]}
                     onPress={onClose}
                     activeOpacity={0.8}
                   >
@@ -234,7 +339,7 @@ const styles = StyleSheet.create({
     fontSize: 100,
   },
   rewardEmoji: {
-    fontSize: 32,
+    fontSize: 24,
   },
   title: {
     fontSize: 28,
@@ -282,12 +387,15 @@ const styles = StyleSheet.create({
   },
   rewardsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
     marginBottom: 24,
     width: '100%',
+    justifyContent: 'center',
   },
   rewardCard: {
-    flex: 1,
+    width: '30%',
+    minWidth: 95,
     borderRadius: 12,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -298,21 +406,22 @@ const styles = StyleSheet.create({
   },
   rewardGradient: {
     alignItems: 'center',
-    paddingVertical: 20,
-    paddingHorizontal: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
   },
   rewardIconBox: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   rewardValue: {
-    fontSize: 28,
-    marginBottom: 4,
+    fontSize: 13,
+    marginBottom: 2,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   rewardLabel: {
     fontSize: 12,

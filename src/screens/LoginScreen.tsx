@@ -7,9 +7,11 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { LinearGradient } from 'expo-linear-gradient';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../theme/ThemeContext';
@@ -19,11 +21,9 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 export function LoginScreen() {
   const navigation = useNavigation<Nav>();
-  const { loginWithOAuth, sendLoginCode, verifyLoginCode } = useAuth();
-  const { colors } = useTheme();
+  const { loginWithOAuth, sendLoginCode } = useAuth();
+  const { colors, isDark } = useTheme();
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
-  const [codeSent, setCodeSent] = useState(false);
 
   const handleOAuth = async (provider: string) => {
     try {
@@ -36,170 +36,177 @@ export function LoginScreen() {
   };
 
   const handleSendCode = async () => {
+    if (!email.trim()) {
+      Alert.alert('Email requis', 'Veuillez entrer votre adresse email');
+      return;
+    }
+
     try {
       await sendLoginCode(email);
-      setCodeSent(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      navigation.navigate('OTP', { email });
     } catch (e: any) {
-      Alert.alert('Erreur', e.message);
-    }
-  };
-
-  const handleVerifyCode = async () => {
-    try {
-      await verifyLoginCode(email, code);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
-    } catch (e: any) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert('Erreur', e.message);
     }
   };
 
   return (
-    <>
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.title, { color: colors.cta, fontFamily: fonts.heading }]}>
-          ANIME DUEL
-        </Text>
-        <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: fonts.body }]}>
-          Devine le personnage !
-        </Text>
-
-        <View style={styles.oauthSection}>
-          <TouchableOpacity
-            style={[styles.oauthBtn, { backgroundColor: '#4285F4' }]}
-            onPress={() => handleOAuth('GOOGLE')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Google</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.oauthBtn, { backgroundColor: '#5865F2' }]}
-            onPress={() => handleOAuth('DISCORD')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Discord</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.oauthBtn, { backgroundColor: colors.text }]}
-            onPress={() => handleOAuth('APPLE')}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.btnText, { fontFamily: fonts.bodyBold, color: colors.background }]}>
-              Apple
-            </Text>
-          </TouchableOpacity>
+    <LinearGradient
+      colors={isDark ? [colors.background, colors.surface] : [colors.surface, colors.background]}
+      style={styles.background}
+    >
+      <View style={styles.container}>
+        {/* Logo Nanika */}
+        <View style={styles.logoContainer}>
+          <Text style={[styles.title, { color: colors.primary, fontFamily: fonts.heading }]}>
+            NANIKA
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+            L'univers des anime te défie
+          </Text>
         </View>
+
+        {/* Bouton OAuth - Google */}
+        <TouchableOpacity
+          style={[styles.googleBtn, { backgroundColor: colors.google }]}
+          onPress={() => handleOAuth('GOOGLE')}
+          activeOpacity={0.8}
+        >
+          <MaterialIcons name="login" size={22} color="#fff" style={styles.btnIcon} />
+          <Text style={[styles.googleBtnText, { fontFamily: fonts.bodyBold }]}>
+            Continuer avec Google
+          </Text>
+        </TouchableOpacity>
 
         <View style={styles.divider}>
           <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
-          <Text style={[styles.dividerText, { color: colors.textMuted, fontFamily: fonts.body }]}>ou</Text>
+          <Text style={[styles.dividerText, { color: colors.textMuted, fontFamily: fonts.body }]}>
+            ou
+          </Text>
           <View style={[styles.dividerLine, { backgroundColor: colors.border }]} />
         </View>
 
+        {/* Email input */}
         <View style={styles.emailSection}>
-          <TextInput
-            style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, fontFamily: fonts.body }]}
-            placeholder="Email"
-            placeholderTextColor={colors.textMuted}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          {!codeSent ? (
-            <TouchableOpacity
-              style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
-              onPress={handleSendCode}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Recevoir un code</Text>
-            </TouchableOpacity>
-          ) : (
-            <>
-              <TextInput
-                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border, fontFamily: fonts.body }]}
-                placeholder="Code a 6 chiffres"
-                placeholderTextColor={colors.textMuted}
-                value={code}
-                onChangeText={setCode}
-                keyboardType="number-pad"
-                maxLength={6}
-              />
-              <TouchableOpacity
-                style={[styles.primaryBtn, { backgroundColor: colors.cta }]}
-                onPress={handleVerifyCode}
-                activeOpacity={0.8}
-              >
-                <Text style={[styles.btnText, { fontFamily: fonts.bodyBold }]}>Verifier</Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <View style={[styles.inputCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <MaterialIcons name="email" size={20} color={colors.primary} style={styles.inputIcon} />
+            <TextInput
+              style={[
+                styles.input,
+                { color: colors.text, fontFamily: fonts.body },
+              ]}
+              placeholder="ton@email.com"
+              placeholderTextColor={colors.textMuted}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.primaryBtn, { backgroundColor: colors.primary }]}
+            onPress={handleSendCode}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.primaryBtnText, { fontFamily: fonts.bodyBold }]}>
+              Recevoir un code
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
-    </>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
+    paddingHorizontal: 32,
+    paddingBottom: 60,
+  },
+  logoContainer: {
     alignItems: 'center',
-    padding: 24,
+    marginBottom: 56,
   },
   title: {
-    fontSize: 36,
-    marginBottom: 4,
+    fontSize: 64,
+    marginBottom: 8,
+    letterSpacing: 6,
   },
   subtitle: {
     fontSize: 16,
-    marginBottom: 40,
+    textAlign: 'center',
+    opacity: 0.9,
   },
-  oauthSection: {
-    width: '100%',
-    gap: 12,
-    marginBottom: 24,
-  },
-  oauthBtn: {
-    minHeight: 48,
-    borderRadius: 12,
+  googleBtn: {
+    minHeight: 56,
+    borderRadius: 14,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  btnText: {
+  btnIcon: {
+    marginRight: 10,
+  },
+  googleBtnText: {
     color: '#fff',
     fontSize: 16,
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '100%',
-    marginVertical: 16,
+    marginVertical: 28,
   },
   dividerLine: {
     flex: 1,
     height: 1,
   },
   dividerText: {
-    marginHorizontal: 12,
+    marginHorizontal: 16,
+    fontSize: 14,
   },
   emailSection: {
-    width: '100%',
-    gap: 12,
+    gap: 16,
+  },
+  inputCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 14,
+    borderWidth: 2,
+    paddingHorizontal: 16,
+    minHeight: 56,
+  },
+  inputIcon: {
+    marginRight: 12,
   },
   input: {
-    borderRadius: 12,
-    minHeight: 48,
-    paddingHorizontal: 16,
+    flex: 1,
     fontSize: 16,
-    borderWidth: 1,
   },
   primaryBtn: {
-    minHeight: 48,
-    borderRadius: 12,
+    minHeight: 56,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  primaryBtnText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });

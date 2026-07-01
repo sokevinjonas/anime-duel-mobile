@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { ActivityIndicator, View, Text, TouchableOpacity, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { LinearGradient } from 'expo-linear-gradient';
 import { HomeScreen } from '../screens/HomeScreen';
+import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { LoginScreen } from '../screens/LoginScreen';
+import { OTPScreen } from '../screens/OTPScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { CatalogScreen } from '../screens/CatalogScreen';
 import { MatchScreen } from '../screens/MatchScreen';
@@ -23,7 +27,9 @@ import { fonts } from '../theme/fonts';
 import { TabBar } from '../components/layout/TabBar';
 
 export type RootStackParamList = {
+  Onboarding: undefined;
   Login: undefined;
+  OTP: { email: string };
   MainTabs: undefined;
   Match: { matchId?: string; roomCode?: string };
   SoloGame: undefined;
@@ -63,29 +69,45 @@ function MainTabs() {
 export function AppNavigator() {
   const { colors } = useTheme();
   const [isReady, setIsReady] = useState(false);
+  const [onboardingSeen, setOnboardingSeen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    async function checkAuth() {
+    async function checkInitialState() {
+      const seen = await AsyncStorage.getItem('onboarding_completed');
+      setOnboardingSeen(seen === 'true');
+
       const token = await getAccessToken();
       setIsLoggedIn(!!token);
+
       setIsReady(true);
     }
-    checkAuth();
+    checkInitialState();
   }, []);
 
   if (!isReady) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
+      <LinearGradient
+        colors={['#1E1537', '#0D0A1A']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+      >
+        <ActivityIndicator size="large" color="#58CC02" />
+      </LinearGradient>
     );
   }
+
+  const getInitialRoute = (): keyof RootStackParamList => {
+    if (!onboardingSeen) return 'Onboarding';
+    if (!isLoggedIn) return 'Login';
+    return 'MainTabs';
+  };
 
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName={isLoggedIn ? 'MainTabs' : 'Login'}
+        initialRouteName={getInitialRoute()}
         screenOptions={{
           headerStyle: { backgroundColor: colors.surface },
           headerTintColor: colors.text,
@@ -95,8 +117,18 @@ export function AppNavigator() {
         }}
       >
         <Stack.Screen
+          name="Onboarding"
+          component={OnboardingScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="Login"
           component={LoginScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="OTP"
+          component={OTPScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

@@ -848,9 +848,9 @@ export function MatchScreen() {
               <Text
                 style={[
                   styles.answerBadge,
-                  item.answer === 'YES' && styles.answerYes,
-                  item.answer === 'NO' && styles.answerNo,
-                  item.answer === 'PARTIALLY' && styles.answerPartial,
+                  item.answer === 'YES' && { backgroundColor: colors.success, color: '#fff' },
+                  item.answer === 'NO' && { backgroundColor: colors.error, color: '#fff' },
+                  item.answer === 'PARTIALLY' && { backgroundColor: colors.warning, color: '#fff' },
                 ]}
               >
                 {item.answer === 'YES' ? 'Oui' : item.answer === 'NO' ? 'Non' : 'Peut-être'}
@@ -1232,18 +1232,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     overflow: 'hidden',
-  },
-  answerYes: {
-    backgroundColor: '#2ecc71',
-    color: '#fff',
-  },
-  answerNo: {
-    backgroundColor: '#e74c3c',
-    color: '#fff',
-  },
-  answerPartial: {
-    backgroundColor: '#f39c12',
-    color: '#fff',
   },
   actionBar: {
     padding: 16,

@@ -31,17 +31,17 @@ const SPIN_WHEEL = gql`
   }
 `;
 
-const WHEEL_REWARDS = [
-  { type: 'berry', amount: 10, chance: '40%', color: '#FFD93D', icon: '🫐' },
-  { type: 'berry', amount: 30, chance: '25%', color: '#FFD93D', icon: '🫐' },
-  { type: 'berry', amount: 50, chance: '15%', color: '#FFD93D', icon: '🫐' },
-  { type: 'chakra', amount: 1, chance: '10%', color: '#6BCFFF', icon: '⚡' },
-  { type: 'berry', amount: 200, chance: '7%', color: '#FFD93D', icon: '🫐' },
-  { type: 'sharingan', amount: 1, chance: '3%', color: '#FF6B6B', icon: 'sharingan-eye' },
-];
-
 export function WheelScreen() {
   const { colors } = useTheme();
+
+  const WHEEL_REWARDS = [
+    { type: 'berry', amount: 10, chance: '40%', color: colors.warning, icon: '🫐' },
+    { type: 'berry', amount: 30, chance: '25%', color: colors.warning, icon: '🫐' },
+    { type: 'berry', amount: 50, chance: '15%', color: colors.warning, icon: '🫐' },
+    { type: 'chakra', amount: 1, chance: '10%', color: colors.info, icon: '⚡' },
+    { type: 'berry', amount: 200, chance: '7%', color: colors.warning, icon: '🫐' },
+    { type: 'sharingan', amount: 1, chance: '3%', color: colors.sharingan, icon: 'sharingan-eye' },
+  ];
   const { data, loading, error, refetch } = useQuery(WHEEL_STATUS_QUERY);
   const [spin, { loading: spinning }] = useMutation(SPIN_WHEEL);
   const [lastReward, setLastReward] = useState<{ type: string; amount: number } | null>(null);
@@ -218,11 +218,11 @@ export function WheelScreen() {
           disabled={spinning || currentBerry < spinCost}
         >
           {spinning ? (
-            <ActivityIndicator size="small" color="#000" />
+            <ActivityIndicator size="small" color={colors.text} />
           ) : (
             <>
               <Text style={styles.spinEmoji}>🫐</Text>
-              <Text style={[styles.spinBtnText, { color: '#000', fontFamily: fonts.bodyBold }]}>
+              <Text style={[styles.spinBtnText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                 {spinCost} BERRY
               </Text>
             </>

@@ -181,7 +181,7 @@ export function EventsScreen() {
               </Text>
             </View>
 
-            <View style={styles.statDivider} />
+            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
 
             <View style={styles.statItem}>
               <MaterialIcons name="cancel" size={24} color={colors.error} />
@@ -271,11 +271,11 @@ export function EventsScreen() {
             disabled={entering || currentBerry < entryFee}
           >
             {entering ? (
-              <ActivityIndicator size="small" color="#000" />
+              <ActivityIndicator size="small" color={colors.text} />
             ) : (
               <>
-                <MaterialIcons name="login" size={20} color="#000" />
-                <Text style={[styles.entryBtnText, { fontFamily: fonts.bodyBold }]}>
+                <MaterialIcons name="login" size={20} color={colors.text} />
+                <Text style={[styles.entryBtnText, { color: colors.text, fontFamily: fonts.bodyBold }]}>
                   PARTICIPER (50 Berry)
                 </Text>
               </>
@@ -371,7 +371,6 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 40,
-    backgroundColor: '#E0E0E0',
   },
   completeBadge: {
     flexDirection: 'row',
@@ -439,6 +438,5 @@ const styles = StyleSheet.create({
   },
   entryBtnText: {
     fontSize: 15,
-    color: '#000',
   },
 });

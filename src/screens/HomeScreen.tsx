@@ -176,7 +176,7 @@ export function HomeScreen() {
               onPress={() => navigation.navigate('Missions')}
               activeOpacity={0.7}
             >
-              <MaterialIcons name="flag" size={22} color={colors.cta} />
+              <MaterialIcons name="flag" size={22} color={colors.primary} />
             </TouchableOpacity>
           </View>
         </View>

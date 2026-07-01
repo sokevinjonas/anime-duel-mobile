@@ -1,5 +1,7 @@
-import { TouchableOpacity, Text, StyleSheet, ViewStyle } from 'react-native';
+import { useRef } from 'react';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, Animated } from 'react-native';
 import * as Haptics from 'expo-haptics';
+import { useTheme } from '../../theme/ThemeContext';
 import { fonts } from '../../theme/fonts';
 
 interface Button3DProps {
@@ -16,15 +18,38 @@ interface Button3DProps {
 export function Button3D({
   title,
   onPress,
-  color = '#58CC02',
-  darkColor = '#46A302',
+  color,
+  darkColor,
   textColor = '#FFFFFF',
   style,
   size = 'medium',
   disabled = false,
 }: Button3DProps) {
-  const heights = { small: 42, medium: 50, large: 56 };
+  const { colors } = useTheme();
+  const resolvedColor = color || colors.primary;
+  const resolvedDarkColor = darkColor || colors.primaryDark;
+  const translateY = useRef(new Animated.Value(0)).current;
+
+  const heights = { small: 42, medium: 50, large: 58 };
   const fontSizes = { small: 14, medium: 16, large: 18 };
+  const shadowHeight = { small: 3, medium: 4, large: 5 };
+
+  const handlePressIn = () => {
+    Animated.timing(translateY, {
+      toValue: shadowHeight[size],
+      duration: 80,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(translateY, {
+      toValue: 0,
+      tension: 200,
+      friction: 10,
+      useNativeDriver: true,
+    }).start();
+  };
 
   const handlePress = () => {
     if (disabled) return;
@@ -32,45 +57,71 @@ export function Button3D({
     onPress();
   };
 
+  const bottomShadow = translateY.interpolate({
+    inputRange: [0, shadowHeight[size]],
+    outputRange: [shadowHeight[size], 0],
+  });
+
   return (
-    <TouchableOpacity
+    <Animated.View
       style={[
-        styles.button,
+        styles.shadowBase,
         {
-          backgroundColor: color,
-          borderBottomColor: darkColor,
+          backgroundColor: resolvedDarkColor,
+          borderRadius: 16,
           minHeight: heights[size],
           opacity: disabled ? 0.5 : 1,
         },
         style,
       ]}
-      onPress={handlePress}
-      activeOpacity={0.9}
-      disabled={disabled}
     >
-      <Text
-        style={[
-          styles.text,
-          {
-            color: textColor,
-            fontSize: fontSizes[size],
-            fontFamily: fonts.bodyBold,
-          },
-        ]}
+      <Animated.View
+        style={{
+          transform: [{ translateY }],
+          marginBottom: bottomShadow,
+        }}
       >
-        {title}
-      </Text>
-    </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.button,
+            {
+              backgroundColor: resolvedColor,
+              minHeight: heights[size] - shadowHeight[size],
+            },
+          ]}
+          onPress={handlePress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          activeOpacity={1}
+          disabled={disabled}
+        >
+          <Text
+            style={[
+              styles.text,
+              {
+                color: textColor,
+                fontSize: fontSizes[size],
+                fontFamily: fonts.bodyBold,
+              },
+            ]}
+          >
+            {title}
+          </Text>
+        </TouchableOpacity>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  shadowBase: {
+    overflow: 'hidden',
+  },
   button: {
     borderRadius: 16,
-    borderBottomWidth: 4,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingVertical: 12,
   },
   text: {

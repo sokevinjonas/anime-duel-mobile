@@ -123,7 +123,7 @@ export function ShopScreen() {
               </View>
             </View>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: colors.border }]} />
 
             <View style={styles.balanceItem}>
               <SharinganIcon size={24} color={colors.error} />
@@ -161,7 +161,7 @@ export function ShopScreen() {
             >
               {pack.bonus > 0 && (
                 <View style={[styles.bonusBadge, { backgroundColor: colors.warning }]}>
-                  <Text style={[styles.bonusText, { fontFamily: fonts.bodyBold }]}>+{pack.bonus}%</Text>
+                  <Text style={[styles.bonusText, { color: colors.text, fontFamily: fonts.bodyBold }]}>+{pack.bonus}%</Text>
                 </View>
               )}
               <BerryIcon size={32} color={colors.warning} />
@@ -188,14 +188,14 @@ export function ShopScreen() {
           activeOpacity={0.8}
         >
           {sharinganLoading ? (
-            <ActivityIndicator color="#000" />
+            <ActivityIndicator color={colors.text} />
           ) : (
             <>
-              <BerryIcon size={18} color="#000" />
-              <Text style={[styles.actionBtnText, { fontFamily: fonts.bodyBold }]}>2900 Berry</Text>
-              <MaterialIcons name="arrow-forward" size={16} color="#000" />
-              <SharinganIcon size={18} color="#000" />
-              <Text style={[styles.actionBtnText, { fontFamily: fonts.bodyBold }]}>1 Sharingan</Text>
+              <BerryIcon size={18} color={colors.text} />
+              <Text style={[styles.actionBtnText, { color: colors.text, fontFamily: fonts.bodyBold }]}>2900 Berry</Text>
+              <MaterialIcons name="arrow-forward" size={16} color={colors.text} />
+              <SharinganIcon size={18} color={colors.text} />
+              <Text style={[styles.actionBtnText, { color: colors.text, fontFamily: fonts.bodyBold }]}>1 Sharingan</Text>
             </>
           )}
         </TouchableOpacity>
@@ -213,7 +213,7 @@ export function ShopScreen() {
           <Text style={styles.sectionEmoji}>🥷</Text>
           <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: fonts.bodyBold }]}>Ninja Pass</Text>
           <View style={[styles.ninjaPassBadge, { backgroundColor: colors.warning }]}>
-            <Text style={[styles.ninjaPassBadgeText, { fontFamily: fonts.bodyBold }]}>BEST VALUE</Text>
+            <Text style={[styles.ninjaPassBadgeText, { color: colors.text, fontFamily: fonts.bodyBold }]}>BEST VALUE</Text>
           </View>
         </View>
         <Text style={[styles.sectionDesc, { color: colors.textSecondary, fontFamily: fonts.body }]}>
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   balanceItem: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   balanceLabel: { fontSize: 12 },
   balanceValue: { fontSize: 18 },
-  divider: { width: 1, height: 40, backgroundColor: '#E0E0E0' },
+  divider: { width: 1, height: 40 },
   section: { marginBottom: 20, gap: 12 },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   sectionTitle: { fontSize: 18 },
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   bonusBadge: { position: 'absolute', top: 8, right: 8, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
-  bonusText: { fontSize: 10, color: '#000' },
+  bonusText: { fontSize: 10 },
   packBerry: { fontSize: 18 },
   packLabel: { fontSize: 12 },
   packPrice: { fontSize: 14 },
@@ -277,8 +277,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 12,
   },
-  actionBtnText: { fontSize: 15, color: '#000' },
+  actionBtnText: { fontSize: 15 },
   insufficientText: { textAlign: 'center', fontSize: 12, marginTop: 8 },
   ninjaPassBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, marginLeft: 'auto' },
-  ninjaPassBadgeText: { fontSize: 10, color: '#000' },
+  ninjaPassBadgeText: { fontSize: 10 },
 });

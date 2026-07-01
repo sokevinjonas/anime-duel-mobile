@@ -1,6 +1,7 @@
 import './src/global.css';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { ApolloProvider } from '@apollo/client/react';
 import {
   useFonts,
@@ -36,9 +37,14 @@ export default function App() {
 
   if (!fontsLoaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#58CC02' }}>
-        <ActivityIndicator size="large" color="#FFFFFF" />
-      </View>
+      <LinearGradient
+        colors={['#1E1537', '#0D0A1A']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+      >
+        <ActivityIndicator size="large" color="#58CC02" />
+      </LinearGradient>
     );
   }
 
