@@ -285,11 +285,13 @@ export function MatchScreen() {
 
       if (remaining === 0) {
         clearInterval(interval);
+        // Auto-return when lobby expires
+        navigation.goBack();
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [phase, expiresAt]);
+  }, [phase, expiresAt, navigation]);
 
   // Character selection timer (20s countdown)
   useEffect(() => {
@@ -415,7 +417,7 @@ export function MatchScreen() {
   const handleCharSelect = (char: { id: string; name: string }) => {
     setSelectedCharId(char.id);
     setSelectedCharName(char.name);
-    setShowCharPicker(false);
+    // Keep picker open - user must click VALIDER button to confirm
     const socket = getSocket();
     socket.emit('match:choose_char', { characterId: char.id });
   };
@@ -425,6 +427,7 @@ export function MatchScreen() {
     const socket = getSocket();
     socket.emit('match:confirm_char');
     setConfirmedChar(true);
+    setShowCharPicker(false); // Only close after confirmation
   };
 
   const handleAskQuestion = () => {
@@ -625,17 +628,14 @@ export function MatchScreen() {
         {selectedCharId && !confirmedChar && (
           <View style={[styles.selectedCharContainer, { backgroundColor: colors.surface }]}>
             <Text style={[styles.selectedCharLabel, { color: colors.textSecondary, fontFamily: fonts.body }]}>
-              Personnage sélectionné:
+              ✓ Sélectionné:
             </Text>
             <Text style={[styles.selectedCharName, { color: colors.primary, fontFamily: fonts.heading }]}>
               {selectedCharName}
             </Text>
-            <TouchableOpacity
-              style={[styles.confirmBtn, { backgroundColor: colors.success }]}
-              onPress={handleConfirmChar}
-            >
-              <Text style={[styles.confirmBtnText, { fontFamily: fonts.bodyBold }]}>VALIDER</Text>
-            </TouchableOpacity>
+            <Text style={[styles.hintText, { color: colors.textSecondary, fontFamily: fonts.body }]}>
+              Clic sur VALIDER en bas du menu
+            </Text>
           </View>
         )}
 
@@ -683,6 +683,10 @@ export function MatchScreen() {
           visible={showCharPicker}
           onSelect={handleCharSelect}
           onClose={() => setShowCharPicker(false)}
+          selectedId={selectedCharId}
+          onConfirm={handleConfirmChar}
+          showConfirmButton={true}
+          disabled={confirmedChar}
         />
       </View>
     );
@@ -1047,9 +1051,15 @@ const styles = StyleSheet.create({
   },
   selectedCharLabel: {
     fontSize: 14,
+    fontWeight: '600',
   },
   selectedCharName: {
     fontSize: 24,
+  },
+  hintText: {
+    fontSize: 12,
+    marginTop: 8,
+    fontStyle: 'italic',
   },
   confirmBtn: {
     paddingVertical: 14,
