@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Modal,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
 import { useTheme } from '../theme/ThemeContext';
@@ -29,9 +30,21 @@ interface CharacterPickerProps {
   visible: boolean;
   onSelect: (character: { id: string; name: string }) => void;
   onClose: () => void;
+  selectedId?: string | null; // Controlled selection
+  onConfirm?: () => void; // Optional separate confirm button
+  showConfirmButton?: boolean; // Show validate button
+  disabled?: boolean; // Disable selection
 }
 
-export function CharacterPicker({ visible, onSelect, onClose }: CharacterPickerProps) {
+export function CharacterPicker({
+  visible,
+  onSelect,
+  onClose,
+  selectedId,
+  onConfirm,
+  showConfirmButton = false,
+  disabled = false,
+}: CharacterPickerProps) {
   const { colors } = useTheme();
   const [search, setSearch] = useState('');
   const { data } = useQuery<any>(CHARACTERS_QUERY, {
@@ -61,24 +74,61 @@ export function CharacterPicker({ visible, onSelect, onClose }: CharacterPickerP
         <FlatList
           data={characters}
           keyExtractor={(item: any) => item.id}
-          renderItem={({ item }: { item: any }) => (
-            <TouchableOpacity
-              style={[styles.item, { borderBottomColor: colors.border }]}
-              onPress={() => onSelect({ id: item.id, name: item.name })}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.itemName, { color: colors.text, fontFamily: fonts.bodyBold }]}>{item.name}</Text>
-              <Text style={[styles.itemAnime, { color: colors.cta, fontFamily: fonts.body }]}>{item.anime.title}</Text>
-            </TouchableOpacity>
-          )}
+          renderItem={({ item }: { item: any }) => {
+            const isSelected = selectedId === item.id;
+            return (
+              <TouchableOpacity
+                style={[
+                  styles.item,
+                  {
+                    borderBottomColor: colors.border,
+                    backgroundColor: isSelected ? colors.primary + '20' : 'transparent',
+                    borderLeftWidth: isSelected ? 4 : 0,
+                    borderLeftColor: colors.primary,
+                  },
+                ]}
+                onPress={() => !disabled && onSelect({ id: item.id, name: item.name })}
+                activeOpacity={0.7}
+                disabled={disabled}
+              >
+                <Text style={[styles.itemName, { color: colors.text, fontFamily: fonts.bodyBold }]}>
+                  {item.name}
+                </Text>
+                <Text style={[styles.itemAnime, { color: colors.cta, fontFamily: fonts.body }]}>
+                  {item.anime.title}
+                </Text>
+                {isSelected && (
+                  <MaterialIcons name="check-circle" size={24} color={colors.success} />
+                )}
+              </TouchableOpacity>
+            );
+          }}
         />
+        {showConfirmButton && (
+          <View style={[styles.confirmContainer, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+            <TouchableOpacity
+              style={[
+                styles.confirmBtn,
+                {
+                  backgroundColor: selectedId ? colors.success : colors.border,
+                },
+              ]}
+              onPress={onConfirm}
+              disabled={!selectedId || disabled}
+            >
+              <Text style={[styles.confirmBtnText, { color: '#FFF', fontFamily: fonts.bodyBold }]}>
+                VALIDER
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 60 },
+  container: { flex: 1, paddingTop: 60, paddingBottom: 80 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -108,4 +158,20 @@ const styles = StyleSheet.create({
   },
   itemName: { fontSize: 15 },
   itemAnime: { fontSize: 13 },
+  confirmContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    borderTopWidth: 1,
+  },
+  confirmBtn: {
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  confirmBtnText: {
+    fontSize: 16,
+  },
 });
